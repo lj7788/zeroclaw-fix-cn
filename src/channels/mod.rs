@@ -42,7 +42,7 @@ pub mod whatsapp_storage;
 #[cfg(feature = "whatsapp-web")]
 pub mod whatsapp_web;
 
-pub use clawdtalk::{ClawdTalkChannel, ClawdTalkConfig};
+pub use clawdtalk::ClawdTalkChannel;
 pub use cli::CliChannel;
 pub use dingtalk::DingTalkChannel;
 pub use discord::DiscordChannel;
@@ -1220,7 +1220,7 @@ fn extract_tool_context_summary(history: &[ChatMessage], start_index: usize) -> 
     format!("[Used tools: {}]", tool_names.join(", "))
 }
 
-fn sanitize_channel_response(response: &str, tools: &[Box<dyn Tool>]) -> String {
+pub fn sanitize_channel_response(response: &str, tools: &[Box<dyn Tool>]) -> String {
     let known_tool_names: HashSet<String> = tools
         .iter()
         .map(|tool| tool.name().to_ascii_lowercase())

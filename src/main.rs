@@ -40,6 +40,8 @@ use std::io::Write;
 use tracing::{info, warn};
 use tracing_subscriber::{fmt, EnvFilter};
 
+use crate::cli_i18n::{t, CliTranslations};
+
 fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
     let t: f64 = s.parse().map_err(|e| format!("{e}"))?;
     if !(0.0..=2.0).contains(&t) {
@@ -122,7 +124,7 @@ enum EstopLevelArg {
 #[command(name = "zeroclaw")]
 #[command(author = "theonlyhennygod")]
 #[command(version)]
-#[command(about = "The fastest, smallest AI assistant.", long_about = None)]
+#[command(about = t("cli.about").as_str(), long_about = None)]
 struct Cli {
     #[arg(long, global = true)]
     config_dir: Option<String>,
@@ -133,7 +135,7 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Initialize your workspace and configuration
+    /// {}
     Onboard {
         /// Run the full interactive wizard (default is quick setup)
         #[arg(long)]

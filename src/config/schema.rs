@@ -766,6 +766,9 @@ pub struct GatewayConfig {
     /// Gateway host (default: 127.0.0.1)
     #[serde(default = "default_gateway_host")]
     pub host: String,
+    /// Gateway locale (default: en)
+    #[serde(default = "default_gateway_locale")]
+    pub locale: String,
     /// Require pairing before accepting requests (default: true)
     #[serde(default = "default_true")]
     pub require_pairing: bool,
@@ -810,6 +813,10 @@ fn default_gateway_host() -> String {
     "127.0.0.1".into()
 }
 
+fn default_gateway_locale() -> String {
+    "zh-CN".into()
+}
+
 fn default_pair_rate_limit() -> u32 {
     10
 }
@@ -839,6 +846,7 @@ impl Default for GatewayConfig {
         Self {
             port: default_gateway_port(),
             host: default_gateway_host(),
+            locale: default_gateway_locale(),
             require_pairing: true,
             allow_public_bind: false,
             paired_tokens: Vec::new(),
@@ -2088,7 +2096,7 @@ impl Default for AutonomyConfig {
 /// Runtime adapter configuration (`[runtime]` section).
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RuntimeConfig {
-    /// Runtime kind (`native` | `docker`).
+    /// Runtime kind (`native` | `docker` | `wasm`).
     #[serde(default = "default_runtime_kind")]
     pub kind: String,
 
@@ -2096,12 +2104,303 @@ pub struct RuntimeConfig {
     #[serde(default)]
     pub docker: DockerRuntimeConfig,
 
+    /// WASM runtime settings (used when `kind = "wasm"`).
+    #[serde(default)]
+    pub wasm: WasmRuntimeConfig,
+
     /// Global reasoning override for providers that expose explicit controls.
     /// - `None`: provider default behavior
     /// - `Some(true)`: request reasoning/thinking when supported
     /// - `Some(false)`: disable reasoning/thinking when supported
     #[serde(default)]
     pub reasoning_enabled: Option<bool>,
+}
+
+/// WASM runtime configuration.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct WasmRuntimeConfig {
+    /// Enable WASM module support.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Fuel limit for WASM execution (in instructions).
+    #[serde(default = "default_wasm_fuel_limit")]
+    pub fuel_limit: u64,
+    /// Memory limit for WASM modules (in MB).
+    #[serde(default = "default_wasm_memory_limit_mb")]
+    pub memory_limit_mb: u32,
+    /// Maximum module size (in MB).
+    #[serde(default = "default_wasm_max_module_size_mb")]
+    pub max_module_size_mb: u32,
+    /// Tools directory for WASM modules.
+    #[serde(default)]
+    pub tools_dir: String,
+    /// Security configuration for WASM.
+    #[serde(default)]
+    pub security: WasmSecurityConfig,
+    /// Allowed hosts for WASM network access.
+    #[serde(default)]
+    pub allowed_hosts: Vec<String>,
+    /// Allow workspace read access.
+    #[serde(default)]
+    pub allow_workspace_read: bool,
+    /// Allow workspace write access.
+    #[serde(default)]
+    pub allow_workspace_write: bool,
+}
+
+/// WASM security configuration.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct WasmSecurityConfig {
+    /// Hash policy for WASM modules.
+    #[serde(default)]
+    pub module_hash_policy: WasmModuleHashPolicy,
+    /// Capability escalation mode.
+    #[serde(default)]
+    pub capability_escalation_mode: WasmCapabilityEscalationMode,
+    /// Require tools directory to be workspace relative.
+    #[serde(default)]
+    pub require_workspace_relative_tools_dir: bool,
+    /// Strict host validation for WASM modules.
+    #[serde(default)]
+    pub strict_host_validation: bool,
+    /// Expected module SHA256 hash.
+    #[serde(default)]
+    pub module_sha256: std::collections::BTreeMap<String, String>,
+}
+
+fn default_wasm_fuel_limit() -> u64 {
+    1_000_000_000
+}
+
+fn default_wasm_memory_limit_mb() -> u32 {
+    64
+}
+
+fn default_wasm_max_module_size_mb() -> u32 {
+    10
+}
+
+impl Default for WasmRuntimeConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            fuel_limit: default_wasm_fuel_limit(),
+            memory_limit_mb: default_wasm_memory_limit_mb(),
+            max_module_size_mb: default_wasm_max_module_size_mb(),
+            tools_dir: String::new(),
+            security: WasmSecurityConfig::default(),
+            allowed_hosts: Vec::new(),
+            allow_workspace_read: false,
+            allow_workspace_write: false,
+        }
+    }
+}
+
+impl Default for WasmSecurityConfig {
+    fn default() -> Self {
+        Self {
+            module_hash_policy: WasmModuleHashPolicy::default(),
+            capability_escalation_mode: WasmCapabilityEscalationMode::default(),
+            require_workspace_relative_tools_dir: false,
+            strict_host_validation: false,
+            module_sha256: std::collections::BTreeMap::new(),
+        }
+    }
+}
+
+impl Default for ResearchTrigger {
+    fn default() -> Self {
+        Self::Never
+    }
+}
+
+impl Default for SyscallAnomalyConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            baseline_syscalls: Vec::new(),
+            alert_threshold: default_syscall_anomaly_threshold(),
+            block_suspicious: false,
+            max_alerts_per_minute: default_syscall_anomaly_max_alerts(),
+            alert_cooldown_secs: default_syscall_anomaly_cooldown(),
+            log_path: default_syscall_anomaly_log_path(),
+            alert_on_unknown_syscall: default_syscall_anomaly_alert_on_unknown(),
+            strict_mode: default_syscall_anomaly_strict_mode(),
+            max_denied_events_per_minute: default_syscall_anomaly_max_denied_events(),
+            max_total_events_per_minute: default_syscall_anomaly_max_total_events(),
+        }
+    }
+}
+
+impl Default for ResearchPhaseConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            trigger: ResearchTrigger::Never,
+            keywords: Vec::new(),
+            min_message_length: 1000,
+            max_iterations: 5,
+            show_progress: true,
+            system_prompt_prefix: String::new(),
+        }
+    }
+}
+
+/// WASM module hash policy.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub enum WasmModuleHashPolicy {
+    /// Disabled - no hash verification.
+    Disabled,
+    /// Warn only - log but allow execution.
+    Warn,
+    /// Enforce - reject execution if hash doesn't match.
+    Enforce,
+}
+
+impl Default for WasmModuleHashPolicy {
+    fn default() -> Self {
+        Self::Disabled
+    }
+}
+
+/// WASM capability escalation mode.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub enum WasmCapabilityEscalationMode {
+    /// Disabled - no capabilities.
+    Disabled,
+    /// Allow with user confirmation.
+    AllowWithConfirm,
+    /// Allow without confirmation.
+    Allow,
+    /// Deny all capabilities.
+    Deny,
+    /// Clamp capabilities to safe limits.
+    Clamp,
+}
+
+impl Default for WasmCapabilityEscalationMode {
+    fn default() -> Self {
+        Self::Disabled
+    }
+}
+
+/// Syscall anomaly detection configuration.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct SyscallAnomalyConfig {
+    /// Enable syscall anomaly detection.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Baseline syscalls to allow.
+    #[serde(default)]
+    pub baseline_syscalls: Vec<String>,
+    /// Alert threshold for anomalies.
+    #[serde(default = "default_syscall_anomaly_threshold")]
+    pub alert_threshold: u32,
+    /// Block suspicious syscalls.
+    #[serde(default)]
+    pub block_suspicious: bool,
+    /// Maximum alerts per minute.
+    #[serde(default = "default_syscall_anomaly_max_alerts")]
+    pub max_alerts_per_minute: u32,
+    /// Alert cooldown in seconds.
+    #[serde(default = "default_syscall_anomaly_cooldown")]
+    pub alert_cooldown_secs: u64,
+    /// Log path for anomaly events.
+    #[serde(default = "default_syscall_anomaly_log_path")]
+    pub log_path: String,
+    /// Alert on unknown syscalls.
+    #[serde(default = "default_syscall_anomaly_alert_on_unknown")]
+    pub alert_on_unknown_syscall: bool,
+    /// Strict mode for syscall enforcement.
+    #[serde(default = "default_syscall_anomaly_strict_mode")]
+    pub strict_mode: bool,
+    /// Maximum denied events per minute.
+    #[serde(default = "default_syscall_anomaly_max_denied_events")]
+    pub max_denied_events_per_minute: u32,
+    /// Maximum total events per minute.
+    #[serde(default = "default_syscall_anomaly_max_total_events")]
+    pub max_total_events_per_minute: u32,
+}
+
+/// Research trigger type.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub enum ResearchTrigger {
+    /// Never trigger research.
+    Never,
+    /// Always trigger research.
+    Always,
+    /// Trigger on specific keywords.
+    Keywords,
+    /// Trigger on message length.
+    Length,
+    /// Trigger on question mark.
+    Question,
+}
+
+/// Research phase configuration.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ResearchPhaseConfig {
+    /// Enable research phase.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Trigger type.
+    #[serde(default)]
+    pub trigger: ResearchTrigger,
+    /// Keywords for keyword trigger.
+    #[serde(default)]
+    pub keywords: Vec<String>,
+    /// Minimum message length for length trigger.
+    #[serde(default = "default_research_min_length")]
+    pub min_message_length: usize,
+    /// Maximum iterations for research.
+    #[serde(default = "default_research_max_iterations")]
+    pub max_iterations: usize,
+    /// Show research progress.
+    #[serde(default)]
+    pub show_progress: bool,
+    /// System prompt prefix.
+    #[serde(default)]
+    pub system_prompt_prefix: String,
+}
+
+fn default_research_min_length() -> usize {
+    1000
+}
+
+fn default_research_max_iterations() -> usize {
+    5
+}
+
+fn default_syscall_anomaly_threshold() -> u32 {
+    10
+}
+
+fn default_syscall_anomaly_max_alerts() -> u32 {
+    5
+}
+
+fn default_syscall_anomaly_cooldown() -> u64 {
+    60
+}
+
+fn default_syscall_anomaly_log_path() -> String {
+    "syscall-anomalies.log".to_string()
+}
+
+fn default_syscall_anomaly_alert_on_unknown() -> bool {
+    true
+}
+
+fn default_syscall_anomaly_strict_mode() -> bool {
+    false
+}
+
+fn default_syscall_anomaly_max_denied_events() -> u32 {
+    5
+}
+
+fn default_syscall_anomaly_max_total_events() -> u32 {
+    120
 }
 
 /// Docker runtime configuration (`[runtime.docker]` section).
@@ -2175,6 +2474,7 @@ impl Default for RuntimeConfig {
         Self {
             kind: default_runtime_kind(),
             docker: DockerRuntimeConfig::default(),
+            wasm: WasmRuntimeConfig::default(),
             reasoning_enabled: None,
         }
     }
@@ -2324,6 +2624,9 @@ pub struct ModelRouteConfig {
     /// Optional API key override for this route's provider
     #[serde(default)]
     pub api_key: Option<String>,
+    /// Maximum tokens for this model
+    #[serde(default)]
+    pub max_tokens: Option<u32>,
 }
 
 // ── Embedding routing ───────────────────────────────────────────
@@ -3260,6 +3563,10 @@ pub struct SecurityConfig {
     /// Emergency-stop state machine configuration.
     #[serde(default)]
     pub estop: EstopConfig,
+
+    /// Syscall anomaly detection configuration.
+    #[serde(default)]
+    pub syscall_anomaly: SyscallAnomalyConfig,
 }
 
 /// OTP validation strategy.

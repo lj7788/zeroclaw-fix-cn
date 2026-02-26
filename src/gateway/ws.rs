@@ -13,6 +13,7 @@ use super::AppState;
 use crate::agent::loop_::run_tool_call_loop;
 use crate::approval::ApprovalManager;
 use crate::providers::ChatMessage;
+use std::sync::Arc;
 use axum::{
     extract::{
         ws::{Message, WebSocket},
@@ -129,8 +130,7 @@ pub async fn handle_ws_chat(
         }
     }
 
-    ws.protocols(["zeroclaw.v1"])
-        .on_upgrade(move |socket| handle_socket(socket, state))
+    ws.on_upgrade(move |socket| handle_socket(socket, state))
         .into_response()
 }
 
@@ -208,7 +208,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState) {
         let result = run_tool_call_loop(
             state.provider.as_ref(),
             &mut history,
-            state.tools_registry_exec.as_ref(),
+            state.tools_registry_exec.as_ref().unwrap_or(&Arc::new(Vec::new())).as_ref(),
             state.observer.as_ref(),
             &provider_label,
             &state.model,
@@ -228,7 +228,7 @@ async fn handle_socket(mut socket: WebSocket, state: AppState) {
         match result {
             Ok(response) => {
                 let safe_response =
-                    finalize_ws_response(&response, &history, state.tools_registry_exec.as_ref());
+                    finalize_ws_response(&response, &history, state.tools_registry_exec.as_ref().unwrap_or(&Arc::new(Vec::new())).as_ref());
                 // Add assistant response to history
                 history.push(ChatMessage::assistant(&safe_response));
 

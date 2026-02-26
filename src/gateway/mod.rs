@@ -306,6 +306,12 @@ pub struct AppState {
     pub observer: Arc<dyn crate::observability::Observer>,
     /// Registered tool specs (for web dashboard tools page)
     pub tools_registry: Arc<Vec<ToolSpec>>,
+    /// Tools registry execution context
+    pub tools_registry_exec: Option<Arc<Vec<Box<dyn crate::tools::traits::Tool>>>>,
+    /// Multimodal support flag
+    pub multimodal: crate::config::MultimodalConfig,
+    /// Maximum tool iterations
+    pub max_tool_iterations: usize,
     /// Cost tracker (optional, for web dashboard cost page)
     pub cost_tracker: Option<Arc<CostTracker>>,
     /// SSE broadcast channel for real-time events
@@ -643,6 +649,9 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         wati: wati_channel,
         observer: broadcast_observer,
         tools_registry,
+        tools_registry_exec: None,
+        multimodal: Default::default(),
+        max_tool_iterations: 5,
         cost_tracker,
         event_tx,
     };
@@ -1598,6 +1607,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -1647,6 +1659,9 @@ mod tests {
             wati: None,
             observer,
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2013,6 +2028,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2077,6 +2095,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2153,6 +2174,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2201,6 +2225,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2254,6 +2281,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2312,6 +2342,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };
@@ -2366,6 +2399,9 @@ mod tests {
             wati: None,
             observer: Arc::new(crate::observability::NoopObserver),
             tools_registry: Arc::new(Vec::new()),
+            tools_registry_exec: None,
+            multimodal: false,
+            max_tool_iterations: 5,
             cost_tracker: None,
             event_tx: tokio::sync::broadcast::channel(16).0,
         };

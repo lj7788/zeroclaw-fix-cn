@@ -35,6 +35,8 @@ use uuid::Uuid;
 
 use super::traits::{Channel, ChannelMessage, SendMessage};
 
+use async_imap::Client;
+
 /// Email channel configuration
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct EmailConfig {
@@ -64,6 +66,10 @@ pub struct EmailConfig {
     /// RFC 2177 recommends clients restart IDLE every 29 minutes
     #[serde(default = "default_idle_timeout", alias = "poll_interval_secs")]
     pub idle_timeout_secs: u64,
+    /// Disable IMAP IDLE and use polling instead (default: false)
+    /// Required for some email providers like 126/163 that don't support IDLE
+    #[serde(default)]
+    pub disable_idle: bool,
     /// Allowed sender addresses/domains (empty = deny all, ["*"] = allow all)
     #[serde(default)]
     pub allowed_senders: Vec<String>,
@@ -107,6 +113,7 @@ impl Default for EmailConfig {
             password: String::new(),
             from_address: String::new(),
             idle_timeout_secs: default_idle_timeout(),
+            disable_idle: false,
             allowed_senders: Vec::new(),
         }
     }
@@ -225,15 +232,15 @@ impl EmailChannel {
         let stream = tls_stream.connect(sni.into(), tcp).await?;
 
         // Create IMAP client
-        let client = async_imap::Client::new(stream);
+        let client = Client::new(stream);
 
-        // Login
+        // Authenticate using login (updated async_imap API)
         let session = client
             .login(&self.config.username, &self.config.password)
             .await
             .map_err(|(e, _)| anyhow!("IMAP login failed: {}", e))?;
 
-        debug!("IMAP login successful");
+        debug!("IMAP authenticate successful");
         Ok(session)
     }
 
@@ -389,6 +396,57 @@ impl EmailChannel {
         }
     }
 
+    /// Main polling-based listen loop for servers that don't support IDLE
+    async fn listen_with_polling(&self, tx: mpsc::Sender<ChannelMessage>) -> Result<()> {
+        let mut backoff = Duration::from_secs(1);
+        let max_backoff = Duration::from_secs(60);
+
+        loop {
+            match self.run_polling_session(&tx).await {
+                Ok(()) => {
+                    // Clean exit (channel closed)
+                    return Ok(());
+                }
+                Err(e) => {
+                    error!(
+                        "IMAP session error: {}. Reconnecting in {:?}...",
+                        e, backoff
+                    );
+                    sleep(backoff).await;
+                    // Exponential backoff with cap
+                    backoff = std::cmp::min(backoff * 2, max_backoff);
+                }
+            }
+        }
+    }
+
+    /// Run a single polling session until error or clean shutdown
+    async fn run_polling_session(&self, tx: &mpsc::Sender<ChannelMessage>) -> Result<()> {
+        // Connect and authenticate
+        let mut session = self.connect_imap().await?;
+
+        // Select the mailbox
+        session.select(&self.config.imap_folder).await?;
+        info!(
+            "Email polling listening on {} (interval: {}s)",
+            self.config.imap_folder, self.config.idle_timeout_secs
+        );
+
+        // Check for existing unseen messages first
+        self.process_unseen(&mut session, tx).await?;
+
+        loop {
+            // Wait for poll interval
+            sleep(Duration::from_secs(self.config.idle_timeout_secs)).await;
+
+            // Check for new messages
+            if let Err(e) = self.process_unseen(&mut session, tx).await {
+                // Connection likely broken, need to reconnect
+                return Err(e);
+            }
+        }
+    }
+
     /// Run a single IDLE session until error or clean shutdown
     async fn run_idle_session(&self, tx: &mpsc::Sender<ChannelMessage>) -> Result<()> {
         // Connect and authenticate
@@ -537,11 +595,19 @@ impl Channel for EmailChannel {
     }
 
     async fn listen(&self, tx: mpsc::Sender<ChannelMessage>) -> Result<()> {
-        info!(
-            "Starting email channel with IDLE support on {}",
-            self.config.imap_folder
-        );
-        self.listen_with_idle(tx).await
+        if self.config.disable_idle {
+            info!(
+                "Starting email channel with polling on {} (interval: {}s)",
+                self.config.imap_folder, self.config.idle_timeout_secs
+            );
+            self.listen_with_polling(tx).await
+        } else {
+            info!(
+                "Starting email channel with IDLE support on {}",
+                self.config.imap_folder
+            );
+            self.listen_with_idle(tx).await
+        }
     }
 
     async fn health_check(&self) -> bool {
@@ -899,6 +965,7 @@ mod tests {
             password: "password123".to_string(),
             from_address: "bot@example.com".to_string(),
             idle_timeout_secs: 1740,
+            disable_idle: false,
             allowed_senders: vec!["allowed@example.com".to_string()],
         };
 

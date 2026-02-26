@@ -95,7 +95,7 @@ impl WasmRuntime {
         if self.config.memory_limit_mb == 0 {
             bail!("runtime.wasm.memory_limit_mb must be > 0");
         }
-        if self.config.memory_limit_mb > Self::MAX_MEMORY_MB {
+        if u64::from(self.config.memory_limit_mb) > Self::MAX_MEMORY_MB {
             bail!(
                 "runtime.wasm.memory_limit_mb of {} exceeds the 4 GB safety limit for 32-bit WASM",
                 self.config.memory_limit_mb
@@ -164,9 +164,9 @@ impl WasmRuntime {
     /// Get the effective memory limit in bytes.
     pub fn effective_memory_bytes(&self, caps: &WasmCapabilities) -> u64 {
         let mb = if caps.memory_override_mb > 0 {
-            caps.memory_override_mb.min(self.config.memory_limit_mb)
+            caps.memory_override_mb.min(self.config.memory_limit_mb as u64)
         } else {
-            self.config.memory_limit_mb
+            self.config.memory_limit_mb as u64
         };
         mb.saturating_mul(1024 * 1024)
     }
@@ -353,7 +353,7 @@ impl WasmRuntime {
                         self.config.fuel_limit
                     );
                 }
-                if caps.memory_override_mb > self.config.memory_limit_mb {
+                if caps.memory_override_mb > self.config.memory_limit_mb as u64 {
                     bail!(
                         "WASM capability escalation blocked: memory_override_mb={} exceeds runtime.wasm.memory_limit_mb={}",
                         caps.memory_override_mb,
@@ -375,6 +375,13 @@ impl WasmRuntime {
                     memory_override_mb: caps.memory_override_mb,
                 })
             }
+            WasmCapabilityEscalationMode::Disabled | WasmCapabilityEscalationMode::AllowWithConfirm | WasmCapabilityEscalationMode::Allow => {
+                // These modes are not yet implemented - treat as deny for now
+                bail!(
+                    "WASM capability escalation mode '{:?}' is not yet implemented",
+                    self.config.security.capability_escalation_mode
+                );
+            }
             WasmCapabilityEscalationMode::Clamp => {
                 let mut effective = WasmCapabilities {
                     read_workspace: caps.read_workspace && self.config.allow_workspace_read,
@@ -388,8 +395,8 @@ impl WasmRuntime {
                     } else {
                         caps.fuel_override
                     },
-                    memory_override_mb: if caps.memory_override_mb > self.config.memory_limit_mb {
-                        self.config.memory_limit_mb
+                    memory_override_mb: if caps.memory_override_mb > self.config.memory_limit_mb as u64 {
+                        self.config.memory_limit_mb as u64
                     } else {
                         caps.memory_override_mb
                     },
@@ -412,7 +419,7 @@ impl WasmRuntime {
                         "Clamped WASM fuel_override to runtime.wasm.fuel_limit"
                     );
                 }
-                if caps.memory_override_mb > self.config.memory_limit_mb {
+                if caps.memory_override_mb > self.config.memory_limit_mb as u64 {
                     tracing::warn!(
                         requested = caps.memory_override_mb,
                         allowed = self.config.memory_limit_mb,
@@ -706,7 +713,7 @@ impl RuntimeAdapter for WasmRuntime {
     }
 
     fn memory_budget(&self) -> u64 {
-        self.config.memory_limit_mb.saturating_mul(1024 * 1024)
+        (self.config.memory_limit_mb as u64).saturating_mul(1024 * 1024)
     }
 
     fn build_shell_command(

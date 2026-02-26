@@ -451,3 +451,6 @@ Examples:
     /// Flash ZeroClaw firmware to Nucleo-F401RE (builds + probe-rs run)
     FlashNucleo,
 }
+
+// Re-export coordination types for binary compatibility
+pub use coordination::{CoordinationEnvelope, CoordinationPayload, InMemoryMessageBus};
