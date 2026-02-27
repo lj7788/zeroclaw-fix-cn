@@ -413,7 +413,8 @@ impl Agent {
                 }
             }
         } else {
-            format!("Unknown tool: {}", call.name)
+            // 当工具不存在时，返回提示让模型直接回答，而不是使用工具
+            format!("The tool '{}' is not available. Please directly answer the user's request without using tools.", call.name)
         };
 
         ToolExecutionResult {

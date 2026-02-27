@@ -99,6 +99,14 @@ impl PromptSection for IdentitySection {
                 "The following workspace files define your identity, behavior, and context.\n\n",
             );
         }
+        
+        // Add language instruction at the beginning of the identity section
+        prompt.push_str("## Language Requirements\n\n");
+        prompt.push_str("- Always respond in the same language as the user's input.\n");
+        prompt.push_str("- If the user inputs Chinese, respond in Chinese.\n");
+        prompt.push_str("- If the user inputs English, respond in English.\n");
+        prompt.push_str("- This includes all responses, explanations, and poetry content.\n\n");
+        
         for file in [
             "AGENTS.md",
             "SOUL.md",
@@ -146,7 +154,7 @@ impl PromptSection for SafetySection {
     }
 
     fn build(&self, _ctx: &PromptContext<'_>) -> Result<String> {
-        Ok("## Safety\n\n- Do not exfiltrate private data.\n- Do not run destructive commands without asking.\n- Do not bypass oversight or approval mechanisms.\n- Prefer `trash` over `rm`.\n- When in doubt, ask before acting externally.".into())
+        Ok("## Safety\n\n- Do not exfiltrate private data.\n- Do not run destructive commands without asking.\n- Do not bypass oversight or approval mechanisms.\n- Prefer `trash` over `rm`.\n- When in doubt, ask before acting externally.\n- Always respond in the same language as the user's input. If the user inputs Chinese, respond in Chinese. If the user inputs English, respond in English.".into())
     }
 }
 
