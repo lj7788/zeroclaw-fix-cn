@@ -54,7 +54,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getPublicHealth()
       .then((health) => {
         if (cancelled) return;
-        if (!health.require_pairing) {
+        // Auto-authenticate if pairing is not required OR already paired
+        if (!health.require_pairing || health.paired) {
           setAuthenticated(true);
         }
       })

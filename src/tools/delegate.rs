@@ -264,9 +264,9 @@ impl Tool for DelegateTool {
     }
 
     fn description(&self) -> &str {
-        "Delegate a subtask to a specialized agent. Use when: a task benefits from a different model \
-         (e.g. fast summarization, deep reasoning, code generation). The sub-agent runs a single \
-         prompt by default; with agentic=true it can iterate with a filtered tool-call loop."
+        "将子任务委托给专业代理。在以下情况使用：任务受益于不同的模型\
+         （例如快速总结、深度推理、代码生成）。默认情况下，子代理运行单个\
+         提示；当 agentic=true 时，它可以通过过滤的工具调用循环进行迭代。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

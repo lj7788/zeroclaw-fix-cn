@@ -744,7 +744,7 @@ impl Tool for ModelRoutingConfigTool {
     }
 
     fn description(&self) -> &str {
-        "Manage default model settings, scenario-based provider/model routes, classification rules, and delegate sub-agent profiles"
+        "管理默认模型设置、基于场景的提供者/模型路由、分类规则和代理子代理配置文件"
     }
 
     fn parameters_schema(&self) -> Value {

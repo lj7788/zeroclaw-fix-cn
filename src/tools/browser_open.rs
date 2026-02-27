@@ -60,7 +60,7 @@ impl Tool for BrowserOpenTool {
     }
 
     fn description(&self) -> &str {
-        "Open an approved HTTPS URL in the system browser. Security constraints: allowlist-only domains, no local/private hosts, no scraping."
+        "在系统浏览器中打开已批准的 HTTPS URL。安全约束：仅允许白名单域名，不允许本地/私有主机，不允许抓取。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

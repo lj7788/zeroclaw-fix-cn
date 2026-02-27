@@ -25,7 +25,7 @@ impl Tool for MemoryStoreTool {
     }
 
     fn description(&self) -> &str {
-        "Store a fact, preference, or note in long-term memory. Use category 'core' for permanent facts, 'daily' for session notes, 'conversation' for chat context, or a custom category name."
+        "在长期记忆中存储事实、偏好或笔记。使用类别 'core' 存储永久事实，'daily' 存储会话笔记，'conversation' 存储聊天上下文，或使用自定义类别名称。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

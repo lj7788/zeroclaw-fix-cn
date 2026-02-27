@@ -22,7 +22,7 @@ impl Tool for CronListTool {
     }
 
     fn description(&self) -> &str {
-        "List all scheduled cron jobs"
+        "列出所有计划的 cron 作业"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

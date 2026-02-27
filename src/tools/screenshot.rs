@@ -306,7 +306,7 @@ impl Tool for ScreenshotTool {
     }
 
     fn description(&self) -> &str {
-        "Capture a screenshot of the current screen. Returns the file path and base64-encoded PNG data."
+        "捕获当前屏幕的截图。返回文件路径和 base64 编码的 PNG 数据。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

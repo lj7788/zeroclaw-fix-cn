@@ -430,7 +430,7 @@ impl Tool for GitOperationsTool {
     }
 
     fn description(&self) -> &str {
-        "Perform structured Git operations (status, diff, log, branch, commit, add, checkout, stash). Provides parsed JSON output and integrates with security policy for autonomy controls."
+        "执行结构化的 Git 操作（status、diff、log、branch、commit、add、checkout、stash）。提供解析的 JSON 输出，并与安全策略集成以实现自主控制。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

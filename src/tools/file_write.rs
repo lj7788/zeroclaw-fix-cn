@@ -22,7 +22,7 @@ impl Tool for FileWriteTool {
     }
 
     fn description(&self) -> &str {
-        "Write contents to a file in the workspace"
+        "将内容写入工作区中的文件"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

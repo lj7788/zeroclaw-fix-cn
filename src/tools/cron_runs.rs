@@ -36,7 +36,7 @@ impl Tool for CronRunsTool {
     }
 
     fn description(&self) -> &str {
-        "List recent run history for a cron job"
+        "列出 cron 作业的最近运行历史"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

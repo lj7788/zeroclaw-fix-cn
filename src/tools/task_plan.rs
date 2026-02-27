@@ -229,8 +229,8 @@ impl Tool for TaskPlanTool {
     }
 
     fn description(&self) -> &str {
-        "Manage a task checklist for the current session. Use to break complex work into steps and track progress.\n\
-         Actions: create (batch), add (single), update (change status), list (view all), delete (clear all)."
+        "管理当前会话的任务清单。用于将复杂工作分解为步骤并跟踪进度。\n\
+         操作：创建（批量）、添加（单个）、更新（更改状态）、列出（查看所有）、删除（清除所有）。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

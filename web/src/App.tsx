@@ -12,16 +12,16 @@ import Cost from './pages/Cost';
 import Logs from './pages/Logs';
 import Doctor from './pages/Doctor';
 import { AuthProvider, useAuth } from './hooks/useAuth';
-import { setLocale, type Locale } from './lib/i18n';
+import { setLocale, type Locale, useLocale } from './lib/i18n';
 
 // Locale context
 interface LocaleContextType {
-  locale: string;
+  locale: Locale;
   setAppLocale: (locale: string) => void;
 }
 
 export const LocaleContext = createContext<LocaleContextType>({
-  locale: 'tr',
+  locale: 'en',
   setAppLocale: () => {},
 });
 
@@ -32,6 +32,7 @@ function PairingDialog({ onPair }: { onPair: (code: string) => Promise<void> }) 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useLocale();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,14 +52,14 @@ function PairingDialog({ onPair }: { onPair: (code: string) => Promise<void> }) 
       <div className="bg-gray-900 rounded-xl p-8 w-full max-w-md border border-gray-800">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-white mb-2">ZeroClaw</h1>
-          <p className="text-gray-400">Enter the pairing code from your terminal</p>
+          <p className="text-gray-400">{t("auth.enter_code")}</p>
         </div>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="6-digit code"
+            placeholder={t("auth.pairing_code")}
             className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-center text-2xl tracking-widest focus:outline-none focus:border-blue-500 mb-4"
             maxLength={6}
             autoFocus
@@ -71,7 +72,7 @@ function PairingDialog({ onPair }: { onPair: (code: string) => Promise<void> }) 
             disabled={loading || code.length < 6}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-lg font-medium transition-colors"
           >
-            {loading ? 'Pairing...' : 'Pair'}
+            {loading ? t("auth.pairing_in_progress") : t("auth.pair_button")}
           </button>
         </form>
       </div>
@@ -81,12 +82,20 @@ function PairingDialog({ onPair }: { onPair: (code: string) => Promise<void> }) 
 
 function AppContent() {
   const { isAuthenticated, loading, pair, logout } = useAuth();
-  const [locale, setLocaleState] = useState('tr');
+  const { locale: detectedLocale } = useLocale();
+  const [locale, setLocaleState] = useState<Locale>(detectedLocale);
 
   const setAppLocale = (newLocale: string) => {
-    setLocaleState(newLocale);
+    setLocaleState(newLocale as Locale);
     setLocale(newLocale as Locale);
   };
+
+  // Sync locale when detected from API
+  useEffect(() => {
+    if (detectedLocale !== locale) {
+      setLocaleState(detectedLocale);
+    }
+  }, [detectedLocale, locale]);
 
   // Listen for 401 events to force logout
   useEffect(() => {

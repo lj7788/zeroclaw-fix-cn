@@ -60,11 +60,12 @@ Built by students and members of the Harvard, MIT, and Sundai.Club communities.
 
 Use this board for important notices (breaking changes, security advisories, maintenance windows, and release blockers).
 
-| Date (UTC) | Level       | Notice                                                                                                                                                                                                                                                                                                                                                 | Action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-02-19 | _Critical_  | We are **not affiliated** with `openagen/zeroclaw`, `zeroclaw.org` or `zeroclaw.net`. The `zeroclaw.org` and `zeroclaw.net` domains currently points to the `openagen/zeroclaw` fork, and that domain/repository are impersonating our official website/project.                                                                                       | Do not trust information, binaries, fundraising, or announcements from those sources. Use only [this repository](https://github.com/zeroclaw-labs/zeroclaw) and our verified social accounts.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 2026-02-21 | _Important_ | Our official website is now live: [zeroclawlabs.ai](https://zeroclawlabs.ai). Thanks for your patience while we prepared the launch. We are still seeing impersonation attempts, so do **not** join any investment or fundraising activity claiming the ZeroClaw name unless it is published through our official channels.                            | Use [this repository](https://github.com/zeroclaw-labs/zeroclaw) as the single source of truth. Follow [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Telegram (@zeroclawlabs)](https://t.me/zeroclawlabs), [Facebook (Group)](https://www.facebook.com/groups/zeroclaw), [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/), and [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search) for official updates. |
-| 2026-02-19 | _Important_ | Anthropic updated the Authentication and Credential Use terms on 2026-02-19. Claude Code OAuth tokens (Free, Pro, Max) are intended exclusively for Claude Code and Claude.ai; using OAuth tokens from Claude Free/Pro/Max in any other product, tool, or service (including Agent SDK) is not permitted and may violate the Consumer Terms of Service. | Please temporarily avoid Claude Code OAuth integrations to prevent potential loss. Original clause: [Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use).                                                                                                                                                                                                                                                                                                                                                                                    |
+
+| Date (UTC) | Level       | Notice                                                                                                                                                                                                                                                                                                                                                  | Action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-02-19 | _Critical_  | We are**not affiliated** with `openagen/zeroclaw`, `zeroclaw.org` or `zeroclaw.net`. The `zeroclaw.org` and `zeroclaw.net` domains currently points to the `openagen/zeroclaw` fork, and that domain/repository are impersonating our official website/project.                                                                                         | Do not trust information, binaries, fundraising, or announcements from those sources. Use only[this repository](https://github.com/zeroclaw-labs/zeroclaw) and our verified social accounts.                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-02-21 | _Important_ | Our official website is now live:[zeroclawlabs.ai](https://zeroclawlabs.ai). Thanks for your patience while we prepared the launch. We are still seeing impersonation attempts, so do **not** join any investment or fundraising activity claiming the ZeroClaw name unless it is published through our official channels.                              | Use[this repository](https://github.com/zeroclaw-labs/zeroclaw) as the single source of truth. Follow [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Telegram (@zeroclawlabs)](https://t.me/zeroclawlabs), [Facebook (Group)](https://www.facebook.com/groups/zeroclaw), [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/), and [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search) for official updates. |
+| 2026-02-19 | _Important_ | Anthropic updated the Authentication and Credential Use terms on 2026-02-19. Claude Code OAuth tokens (Free, Pro, Max) are intended exclusively for Claude Code and Claude.ai; using OAuth tokens from Claude Free/Pro/Max in any other product, tool, or service (including Agent SDK) is not permitted and may violate the Consumer Terms of Service. | Please temporarily avoid Claude Code OAuth integrations to prevent potential loss. Original clause:[Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use).                                                                                                                                                                                                                                                                                                                  |
 
 ### ✨ Features
 
@@ -72,6 +73,29 @@ Use this board for important notices (breaking changes, security advisories, mai
 - 💰 **Cost-Efficient Deployment:** Designed for low-cost boards and small cloud instances without heavyweight runtime dependencies.
 - ⚡ **Fast Cold Starts:** Single-binary Rust runtime keeps command and daemon startup near-instant for daily operations.
 - 🌍 **Portable Architecture:** One binary-first workflow across ARM, x86, and RISC-V with swappable providers/channels/tools.
+
+### 🇨🇳 汉化与Web抽取工作
+
+本分支（zeroclaw-fix-cn）包含以下增强功能：
+
+1. **全面汉化**：
+
+   - 工具描述汉化：将所有工具的`fn description(&self)`方法返回值汉化为中文
+   - 集成描述汉化：将集成条目（IntegrationEntry）的description字段汉化为中文
+   - 前端界面汉化：将前端页面中的英文文本汉化为中文，包括状态标签等
+2. **Web项目抽取**：
+
+   - 将web项目分离为独立目录结构（zeroclaw+web目录方式）
+   - 修改web_dir判断方式，优先使用外部web/dist目录，不存在则使用内嵌文件
+3. **功能增强**：
+
+   - 在Memory.tsx页面增加批量删除功能
+   - 修复特定内存条目无法删除的问题
+4. **Gateway效果图**：
+
+   - ![ZeroClaw Gateway截图1](haha/zeroclaw1.png)
+   - ![ZeroClaw Gateway截图2](haha/zeroclaw02.png)
+   - ![ZeroClaw Gateway截图3](haha/zeroclaw03.png)
 
 ### Why teams pick ZeroClaw
 
@@ -83,6 +107,7 @@ Use this board for important notices (breaking changes, security advisories, mai
 ## Benchmark Snapshot (ZeroClaw vs OpenClaw, Reproducible)
 
 Local machine quick benchmark (macOS arm64, Feb 2026) normalized for 0.8GHz edge hardware.
+
 
 |                           | OpenClaw      | NanoBot        | PicoClaw        | ZeroClaw 🦀          |
 | ------------------------- | ------------- | -------------- | --------------- | -------------------- |
@@ -125,25 +150,24 @@ Example sample (macOS arm64, measured on February 18, 2026):
 
 1. **Visual Studio Build Tools** (provides the MSVC linker and Windows SDK):
 
-    ```powershell
-    winget install Microsoft.VisualStudio.2022.BuildTools
-    ```
+   ```powershell
+   winget install Microsoft.VisualStudio.2022.BuildTools
+   ```
 
-    During installation (or via the Visual Studio Installer), select the **"Desktop development with C++"** workload.
-
+   During installation (or via the Visual Studio Installer), select the **"Desktop development with C++"** workload.
 2. **Rust toolchain:**
 
-    ```powershell
-    winget install Rustlang.Rustup
-    ```
+   ```powershell
+   winget install Rustlang.Rustup
+   ```
 
-    After installation, open a new terminal and run `rustup default stable` to ensure the stable toolchain is active.
-
+   After installation, open a new terminal and run `rustup default stable` to ensure the stable toolchain is active.
 3. **Verify** both are working:
-    ```powershell
-    rustc --version
-    cargo --version
-    ```
+
+   ```powershell
+   rustc --version
+   cargo --version
+   ```
 
 #### Optional
 
@@ -157,23 +181,23 @@ Example sample (macOS arm64, measured on February 18, 2026):
 #### Required
 
 1. **Build essentials:**
-    - **Linux (Debian/Ubuntu):** `sudo apt install build-essential pkg-config`
-    - **Linux (Fedora/RHEL):** `sudo dnf group install development-tools && sudo dnf install pkg-config`
-    - **macOS:** Install Xcode Command Line Tools: `xcode-select --install`
 
+   - **Linux (Debian/Ubuntu):** `sudo apt install build-essential pkg-config`
+   - **Linux (Fedora/RHEL):** `sudo dnf group install development-tools && sudo dnf install pkg-config`
+   - **macOS:** Install Xcode Command Line Tools: `xcode-select --install`
 2. **Rust toolchain:**
 
-    ```bash
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    ```
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
 
-    See [rustup.rs](https://rustup.rs) for details.
-
+   See [rustup.rs](https://rustup.rs) for details.
 3. **Verify** both are working:
-    ```bash
-    rustc --version
-    cargo --version
-    ```
+
+   ```bash
+   rustc --version
+   cargo --version
+   ```
 
 #### One-Line Installer
 
@@ -186,6 +210,7 @@ curl -LsSf https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/main/scripts
 #### Compilation resource requirements
 
 Building from source needs more resources than running the resulting binary:
+
 
 | Resource       | Minimum | Recommended |
 | -------------- | ------- | ----------- |
@@ -267,7 +292,7 @@ Release assets are published for:
 - Windows: `x86_64`
 
 Download the latest assets from:
-<https://github.com/zeroclaw-labs/zeroclaw/releases/latest>
+[https://github.com/zeroclaw-labs/zeroclaw/releases/latest](https://github.com/zeroclaw-labs/zeroclaw/releases/latest)
 
 Example (ARM64 Linux):
 
@@ -401,20 +426,21 @@ Every subsystem is a **trait** — swap implementations with a config change, ze
   <img src="docs/architecture.svg" alt="ZeroClaw Architecture" width="900" />
 </p>
 
-| Subsystem         | Trait            | Ships with                                                                                                                                                                 | Extend                                                                                       |
-| ----------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **AI Models**     | `Provider`       | Provider catalog via `zeroclaw providers` (built-ins + aliases, plus custom endpoints)                                                                                     | `custom:https://your-api.com` (OpenAI-compatible) or `anthropic-custom:https://your-api.com` |
-| **Channels**      | `Channel`        | CLI, Telegram, Discord, Slack, Mattermost, iMessage, Matrix, Signal, WhatsApp, Linq, Email, IRC, Lark, DingTalk, QQ, Nostr, Webhook                                        | Any messaging API                                                                            |
-| **Memory**        | `Memory`         | SQLite hybrid search, PostgreSQL backend (configurable storage provider), Lucid bridge, Markdown files, explicit `none` backend, snapshot/hydrate, optional response cache | Any persistence backend                                                                      |
-| **Tools**         | `Tool`           | shell/file/memory, cron/schedule, git, pushover, browser, http_request, screenshot/image_info, composio (opt-in), delegate, hardware tools                                 | Any capability                                                                               |
-| **Observability** | `Observer`       | Noop, Log, Multi                                                                                                                                                           | Prometheus, OTel                                                                             |
-| **Runtime**       | `RuntimeAdapter` | Native, Docker (sandboxed)                                                                                                                                                 | Additional runtimes can be added via adapter; unsupported kinds fail fast                    |
-| **Security**      | `SecurityPolicy` | Gateway pairing, sandbox, allowlists, rate limits, filesystem scoping, encrypted secrets                                                                                   | —                                                                                            |
-| **Identity**      | `IdentityConfig` | OpenClaw (markdown), AIEOS v1.1 (JSON)                                                                                                                                     | Any identity format                                                                          |
-| **Tunnel**        | `Tunnel`         | None, Cloudflare, Tailscale, ngrok, Custom                                                                                                                                 | Any tunnel binary                                                                            |
-| **Heartbeat**     | Engine           | HEARTBEAT.md periodic tasks                                                                                                                                                | —                                                                                            |
-| **Skills**        | Loader           | TOML manifests + SKILL.md instructions                                                                                                                                     | Community skill packs                                                                        |
-| **Integrations**  | Registry         | 70+ integrations across 9 categories                                                                                                                                       | Plugin system                                                                                |
+
+| Subsystem         | Trait            | Ships with                                                                                                                                                                | Extend                                                                                       |
+| ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **AI Models**     | `Provider`       | Provider catalog via`zeroclaw providers` (built-ins + aliases, plus custom endpoints)                                                                                     | `custom:https://your-api.com` (OpenAI-compatible) or `anthropic-custom:https://your-api.com` |
+| **Channels**      | `Channel`        | CLI, Telegram, Discord, Slack, Mattermost, iMessage, Matrix, Signal, WhatsApp, Linq, Email, IRC, Lark, DingTalk, QQ, Nostr, Webhook                                       | Any messaging API                                                                            |
+| **Memory**        | `Memory`         | SQLite hybrid search, PostgreSQL backend (configurable storage provider), Lucid bridge, Markdown files, explicit`none` backend, snapshot/hydrate, optional response cache | Any persistence backend                                                                      |
+| **Tools**         | `Tool`           | shell/file/memory, cron/schedule, git, pushover, browser, http_request, screenshot/image_info, composio (opt-in), delegate, hardware tools                                | Any capability                                                                               |
+| **Observability** | `Observer`       | Noop, Log, Multi                                                                                                                                                          | Prometheus, OTel                                                                             |
+| **Runtime**       | `RuntimeAdapter` | Native, Docker (sandboxed)                                                                                                                                                | Additional runtimes can be added via adapter; unsupported kinds fail fast                    |
+| **Security**      | `SecurityPolicy` | Gateway pairing, sandbox, allowlists, rate limits, filesystem scoping, encrypted secrets                                                                                  | —                                                                                           |
+| **Identity**      | `IdentityConfig` | OpenClaw (markdown), AIEOS v1.1 (JSON)                                                                                                                                    | Any identity format                                                                          |
+| **Tunnel**        | `Tunnel`         | None, Cloudflare, Tailscale, ngrok, Custom                                                                                                                                | Any tunnel binary                                                                            |
+| **Heartbeat**     | Engine           | HEARTBEAT.md periodic tasks                                                                                                                                               | —                                                                                           |
+| **Skills**        | Loader           | TOML manifests + SKILL.md instructions                                                                                                                                    | Community skill packs                                                                        |
+| **Integrations**  | Registry         | 70+ integrations across 9 categories                                                                                                                                      | Plugin system                                                                                |
 
 ### Runtime support (current)
 
@@ -427,14 +453,15 @@ When an unsupported `runtime.kind` is configured, ZeroClaw now exits with a clea
 
 All custom, zero external dependencies — no Pinecone, no Elasticsearch, no LangChain:
 
+
 | Layer              | Implementation                                                |
 | ------------------ | ------------------------------------------------------------- |
 | **Vector DB**      | Embeddings stored as BLOB in SQLite, cosine similarity search |
 | **Keyword Search** | FTS5 virtual tables with BM25 scoring                         |
 | **Hybrid Merge**   | Custom weighted merge function (`vector.rs`)                  |
-| **Embeddings**     | `EmbeddingProvider` trait — OpenAI, custom URL, or noop       |
+| **Embeddings**     | `EmbeddingProvider` trait — OpenAI, custom URL, or noop      |
 | **Chunking**       | Line-based markdown chunker with heading preservation         |
-| **Caching**        | SQLite `embedding_cache` table with LRU eviction              |
+| **Caching**        | SQLite`embedding_cache` table with LRU eviction               |
 | **Safe Reindex**   | Rebuild FTS5 + re-embed missing vectors atomically            |
 
 The agent automatically recalls, saves, and manages memory via tools.
@@ -478,12 +505,13 @@ ZeroClaw enforces security at **every layer** — not just the sandbox. It passe
 
 ### Security Checklist
 
-| #   | Item                             | Status | How                                                                                                                                                                                                                      |
-| --- | -------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | **Gateway not publicly exposed** | ✅     | Binds `127.0.0.1` by default. Refuses `0.0.0.0` without tunnel or explicit `allow_public_bind = true`.                                                                                                                   |
-| 2   | **Pairing required**             | ✅     | 6-digit one-time code on startup. Exchange via `POST /pair` for bearer token. All `/webhook` requests require `Authorization: Bearer <token>`.                                                                           |
-| 3   | **Filesystem scoped (no /)**     | ✅     | `workspace_only = true` by default. 14 system dirs + 4 sensitive dotfiles blocked. Null byte injection blocked. Symlink escape detection via canonicalization + resolved-path workspace checks in file read/write tools. |
-| 4   | **Access via tunnel only**       | ✅     | Gateway refuses public bind without active tunnel. Supports Tailscale, Cloudflare, ngrok, or any custom tunnel.                                                                                                          |
+
+| # | Item                             | Status | How                                                                                                                                                                                                                      |
+| - | -------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1 | **Gateway not publicly exposed** | ✅     | Binds`127.0.0.1` by default. Refuses `0.0.0.0` without tunnel or explicit `allow_public_bind = true`.                                                                                                                    |
+| 2 | **Pairing required**             | ✅     | 6-digit one-time code on startup. Exchange via`POST /pair` for bearer token. All `/webhook` requests require `Authorization: Bearer <token>`.                                                                            |
+| 3 | **Filesystem scoped (no /)**     | ✅     | `workspace_only = true` by default. 14 system dirs + 4 sensitive dotfiles blocked. Null byte injection blocked. Symlink escape detection via canonicalization + resolved-path workspace checks in file read/write tools. |
+| 4 | **Access via tunnel only**       | ✅     | Gateway refuses public bind without active tunnel. Supports Tailscale, Cloudflare, ngrok, or any custom tunnel.                                                                                                          |
 
 > **Run your own nmap:** `nmap -p 1-65535 <your-host>` — ZeroClaw binds to localhost only, so nothing is exposed unless you explicitly configure a tunnel.
 
@@ -560,25 +588,23 @@ ZeroClaw supports two WhatsApp backends:
 
 1. **Build with WhatsApp Web support:**
 
-    ```bash
-    cargo build --features whatsapp-web
-    ```
-
+   ```bash
+   cargo build --features whatsapp-web
+   ```
 2. **Configure ZeroClaw:**
 
-    ```toml
-    [channels_config.whatsapp]
-    session_path = "~/.zeroclaw/state/whatsapp-web/session.db"
-    pair_phone = "+15551234567"   # optional; omit to use QR flow
-    pair_code = ""               # optional custom pair code
-    allowed_numbers = ["+1234567890"]  # E.164 format, or ["*"] for all
-    ```
-
+   ```toml
+   [channels_config.whatsapp]
+   session_path = "~/.zeroclaw/state/whatsapp-web/session.db"
+   pair_phone = "+15551234567"   # optional; omit to use QR flow
+   pair_code = ""               # optional custom pair code
+   allowed_numbers = ["+1234567890"]  # E.164 format, or ["*"] for all
+   ```
 3. **Start channels/daemon and link device:**
-    - Run `zeroclaw channel start` (or `zeroclaw daemon`).
-    - Follow terminal pairing output (QR or pair code).
-    - In WhatsApp on phone: **Settings → Linked Devices**.
 
+   - Run `zeroclaw channel start` (or `zeroclaw daemon`).
+   - Follow terminal pairing output (QR or pair code).
+   - In WhatsApp on phone: **Settings → Linked Devices**.
 4. **Test:** Send a message from an allowed number and verify the agent replies.
 
 #### WhatsApp Business Cloud API mode
@@ -586,39 +612,37 @@ ZeroClaw supports two WhatsApp backends:
 WhatsApp uses Meta's Cloud API with webhooks (push-based, not polling):
 
 1. **Create a Meta Business App:**
-    - Go to [developers.facebook.com](https://developers.facebook.com)
-    - Create a new app → Select "Business" type
-    - Add the "WhatsApp" product
 
+   - Go to [developers.facebook.com](https://developers.facebook.com)
+   - Create a new app → Select "Business" type
+   - Add the "WhatsApp" product
 2. **Get your credentials:**
-    - **Access Token:** From WhatsApp → API Setup → Generate token (or create a System User for permanent tokens)
-    - **Phone Number ID:** From WhatsApp → API Setup → Phone number ID
-    - **Verify Token:** You define this (any random string) — Meta will send it back during webhook verification
 
+   - **Access Token:** From WhatsApp → API Setup → Generate token (or create a System User for permanent tokens)
+   - **Phone Number ID:** From WhatsApp → API Setup → Phone number ID
+   - **Verify Token:** You define this (any random string) — Meta will send it back during webhook verification
 3. **Configure ZeroClaw:**
 
-    ```toml
-    [channels_config.whatsapp]
-    access_token = "EAABx..."
-    phone_number_id = "123456789012345"
-    verify_token = "my-secret-verify-token"
-    allowed_numbers = ["+1234567890"]  # E.164 format, or ["*"] for all
-    ```
-
+   ```toml
+   [channels_config.whatsapp]
+   access_token = "EAABx..."
+   phone_number_id = "123456789012345"
+   verify_token = "my-secret-verify-token"
+   allowed_numbers = ["+1234567890"]  # E.164 format, or ["*"] for all
+   ```
 4. **Start the gateway with a tunnel:**
 
-    ```bash
-    zeroclaw gateway --port 42617
-    ```
+   ```bash
+   zeroclaw gateway --port 42617
+   ```
 
-    WhatsApp requires HTTPS, so use a tunnel (ngrok, Cloudflare, Tailscale Funnel).
-
+   WhatsApp requires HTTPS, so use a tunnel (ngrok, Cloudflare, Tailscale Funnel).
 5. **Configure Meta webhook:**
-    - In Meta Developer Console → WhatsApp → Configuration → Webhook
-    - **Callback URL:** `https://your-tunnel-url/whatsapp`
-    - **Verify Token:** Same as your `verify_token` in config
-    - Subscribe to `messages` field
 
+   - In Meta Developer Console → WhatsApp → Configuration → Webhook
+   - **Callback URL:** `https://your-tunnel-url/whatsapp`
+   - **Verify Token:** Same as your `verify_token` in config
+   - Subscribe to `messages` field
 6. **Test:** Send a message to your WhatsApp Business number — ZeroClaw will respond via the LLM.
 
 ## Configuration
@@ -934,6 +958,7 @@ ZeroClaw accepts both canonical AIEOS generator payloads and compact legacy payl
 
 #### AIEOS Schema Sections
 
+
 | Section        | Description                                                   |
 | -------------- | ------------------------------------------------------------- |
 | `identity`     | Names, bio, origin, residence                                 |
@@ -949,21 +974,23 @@ See [aieos.org](https://aieos.org) for the full schema and live examples.
 
 ## Gateway API
 
-| Endpoint    | Method | Auth                                                                 | Description                                                              |
-| ----------- | ------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `/health`   | GET    | None                                                                 | Health check (always public, no secrets leaked)                          |
-| `/pair`     | POST   | `X-Pairing-Code` header                                              | Exchange one-time code for bearer token                                  |
-| `/webhook`  | POST   | `Authorization: Bearer <token>`                                      | Send message: `{"message": "your prompt"}`; optional `X-Idempotency-Key` |
-| `/whatsapp` | GET    | Query params                                                         | Meta webhook verification (hub.mode, hub.verify_token, hub.challenge)    |
-| `/whatsapp` | POST   | Meta signature (`X-Hub-Signature-256`) when app secret is configured | WhatsApp incoming message webhook                                        |
+
+| Endpoint    | Method | Auth                                                                 | Description                                                             |
+| ----------- | ------ | -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `/health`   | GET    | None                                                                 | Health check (always public, no secrets leaked)                         |
+| `/pair`     | POST   | `X-Pairing-Code` header                                              | Exchange one-time code for bearer token                                 |
+| `/webhook`  | POST   | `Authorization: Bearer <token>`                                      | Send message:`{"message": "your prompt"}`; optional `X-Idempotency-Key` |
+| `/whatsapp` | GET    | Query params                                                         | Meta webhook verification (hub.mode, hub.verify_token, hub.challenge)   |
+| `/whatsapp` | POST   | Meta signature (`X-Hub-Signature-256`) when app secret is configured | WhatsApp incoming message webhook                                       |
 
 ## Commands
+
 
 | Command                                       | Description                                                                          |
 | --------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `onboard`                                     | Quick setup (default)                                                                |
 | `agent`                                       | Interactive or single-message chat mode                                              |
-| `gateway`                                     | Start webhook server (default: `127.0.0.1:42617`)                                    |
+| `gateway`                                     | Start webhook server (default:`127.0.0.1:42617`)                                     |
 | `daemon`                                      | Start long-running autonomous runtime                                                |
 | `service install/start/stop/status/uninstall` | Manage background service (systemd user-level or OpenRC system-wide)                 |
 | `doctor`                                      | Diagnose daemon/scheduler/channel freshness                                          |
@@ -985,6 +1012,7 @@ For a task-oriented command guide, see [`docs/commands-reference.md`](docs/comma
 ### Service Management
 
 ZeroClaw supports two init systems for background services:
+
 
 | Init System                    | Scope       | Config Path                 | Requires  |
 | ------------------------------ | ----------- | --------------------------- | --------- |
@@ -1127,9 +1155,10 @@ If you encounter impersonation or trademark misuse, please [open an issue](https
 
 ZeroClaw is dual-licensed for maximum openness and contributor protection:
 
-| License | Use case |
-|---|---|
-| [MIT](LICENSE-MIT) | Open-source, research, academic, personal use |
+
+| License                      | Use case                                                |
+| ---------------------------- | ------------------------------------------------------- |
+| [MIT](LICENSE-MIT)           | Open-source, research, academic, personal use           |
 | [Apache 2.0](LICENSE-APACHE) | Patent protection, institutional, commercial deployment |
 
 You may choose either license. **Contributors automatically grant rights under both** — see [CLA.md](CLA.md) for the full contributor agreement.

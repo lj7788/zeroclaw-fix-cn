@@ -24,9 +24,9 @@ impl Tool for GlobSearchTool {
     }
 
     fn description(&self) -> &str {
-        "Search for files matching a glob pattern within the workspace. \
-         Returns a sorted list of matching file paths relative to the workspace root. \
-         Examples: '**/*.rs' (all Rust files), 'src/**/mod.rs' (all mod.rs in src)."
+        "在工作区中搜索匹配 glob 模式的文件。\
+         返回相对于工作区根目录的匹配文件路径的排序列表。\
+         示例：'**/*.rs'（所有 Rust 文件），'src/**/mod.rs'（src 中的所有 mod.rs）。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

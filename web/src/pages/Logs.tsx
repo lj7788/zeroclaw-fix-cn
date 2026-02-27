@@ -146,11 +146,11 @@ export default function Logs() {
               }`}
             />
             <span className="text-xs text-gray-500">
-              {connected ? 'Connected' : 'Disconnected'}
+              {connected ? '已连接' : '已断开'}
             </span>
           </div>
           <span className="text-xs text-gray-500 ml-2">
-            {filteredEntries.length} events
+            {filteredEntries.length} 条事件 
           </span>
         </div>
 
@@ -166,11 +166,11 @@ export default function Logs() {
           >
             {paused ? (
               <>
-                <Play className="h-3.5 w-3.5" /> Resume
+                <Play className="h-3.5 w-3.5" /> 继续
               </>
             ) : (
               <>
-                <Pause className="h-3.5 w-3.5" /> Pause
+                <Pause className="h-3.5 w-3.5" /> 暂停
               </>
             )}
           </button>
@@ -182,7 +182,7 @@ export default function Logs() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             >
               <ArrowDown className="h-3.5 w-3.5" />
-              Jump to bottom
+              跳转到底部
             </button>
           )}
         </div>
@@ -212,7 +212,7 @@ export default function Logs() {
               onClick={() => setTypeFilters(new Set())}
               className="text-xs text-blue-400 hover:text-blue-300 flex-shrink-0 ml-1"
             >
-              Clear
+              清除筛选
             </button>
           )}
         </div>
@@ -229,8 +229,8 @@ export default function Logs() {
             <Activity className="h-10 w-10 text-gray-600 mb-3" />
             <p className="text-sm">
               {paused
-                ? 'Log streaming is paused.'
-                : 'Waiting for events...'}
+                ? '日志流已暂停'
+                : '等待事件...'}
             </p>
           </div>
         ) : (

@@ -66,8 +66,8 @@ impl Tool for SubAgentSpawnTool {
     }
 
     fn description(&self) -> &str {
-        "Spawn a delegate agent in the background. Returns immediately with a session_id. \
-         Use subagent_list to check progress and subagent_manage to steer or kill."
+        "在后台启动一个代理子代理。立即返回 session_id。\
+         使用 subagent_list 检查进度，使用 subagent_manage 引导或终止。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

@@ -44,7 +44,7 @@ export default function Tools() {
     return (
       <div className="p-6">
         <div className="rounded-lg bg-red-900/30 border border-red-700 p-4 text-red-300">
-          Failed to load tools: {error}
+          加载工具失败: {error}
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ export default function Tools() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search tools..."
+          placeholder="搜索工具..."
           className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
@@ -77,12 +77,12 @@ export default function Tools() {
         <div className="flex items-center gap-2 mb-4">
           <Wrench className="h-5 w-5 text-blue-400" />
           <h2 className="text-base font-semibold text-white">
-            Agent Tools ({filtered.length})
+            智能体工具 ({filtered.length})
           </h2>
         </div>
 
         {filtered.length === 0 ? (
-          <p className="text-sm text-gray-500">No tools match your search.</p>
+          <p className="text-sm text-gray-500">没有匹配的工具。</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map((tool) => {
@@ -119,7 +119,7 @@ export default function Tools() {
                   {isExpanded && tool.parameters && (
                     <div className="border-t border-gray-800 p-4">
                       <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wider">
-                        Parameter Schema
+                        参数模式
                       </p>
                       <pre className="text-xs text-gray-300 bg-gray-950 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto">
                         {JSON.stringify(tool.parameters, null, 2)}
@@ -139,7 +139,7 @@ export default function Tools() {
           <div className="flex items-center gap-2 mb-4">
             <Terminal className="h-5 w-5 text-green-400" />
             <h2 className="text-base font-semibold text-white">
-              CLI Tools ({filteredCli.length})
+              CLI 工具 ({filteredCli.length})
             </h2>
           </div>
 
@@ -148,16 +148,16 @@ export default function Tools() {
               <thead>
                 <tr className="border-b border-gray-800">
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                    Name
+                    名称
                   </th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                    Path
+                    路径
                   </th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                    Version
+                    版本
                   </th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                    Category
+                    类别
                   </th>
                 </tr>
               </thead>

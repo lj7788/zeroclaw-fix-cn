@@ -97,7 +97,7 @@ impl Tool for SopStatusTool {
     }
 
     fn description(&self) -> &str {
-        "Query SOP execution status. Provide run_id for a specific run, or sop_name to list runs for that SOP. With no arguments, shows all active runs."
+        "查询 SOP 执行状态。提供 run_id 获取特定运行的状态，或提供 sop_name 列出该 SOP 的所有运行。不提供参数时，显示所有活动运行。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

@@ -766,7 +766,7 @@ pub struct GatewayConfig {
     /// Gateway host (default: 127.0.0.1)
     #[serde(default = "default_gateway_host")]
     pub host: String,
-    /// Gateway locale (default: en)
+    /// Gateway locale (default: zh-CN)
     #[serde(default = "default_gateway_locale")]
     pub locale: String,
     /// Require pairing before accepting requests (default: true)

@@ -31,9 +31,9 @@ impl Tool for SubAgentManageTool {
     }
 
     fn description(&self) -> &str {
-        "Manage a background sub-agent session. Actions: \
-         'status' returns current status and partial output; \
-         'kill' cancels a running session."
+        "管理后台子代理会话。操作：\
+         'status' 返回当前状态和部分输出；\
+         'kill' 取消正在运行的会话。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

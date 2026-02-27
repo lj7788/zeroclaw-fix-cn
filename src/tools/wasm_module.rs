@@ -78,7 +78,7 @@ impl Tool for WasmModuleTool {
     }
 
     fn description(&self) -> &str {
-        "List or execute sandboxed WASM modules from runtime.wasm.tools_dir"
+        "列出或执行来自 runtime.wasm.tools_dir 的沙箱化 WASM 模块"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

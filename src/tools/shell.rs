@@ -105,7 +105,7 @@ impl Tool for ShellTool {
     }
 
     fn description(&self) -> &str {
-        "Execute a shell command in the workspace directory"
+        "在工作区目录中执行 shell 命令"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

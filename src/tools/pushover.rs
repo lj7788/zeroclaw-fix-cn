@@ -83,7 +83,7 @@ impl Tool for PushoverTool {
     }
 
     fn description(&self) -> &str {
-        "Send a Pushover notification to your device. Requires PUSHOVER_TOKEN and PUSHOVER_USER_KEY in .env file."
+        "向您的设备发送 Pushover 通知。需要在 .env 文件中设置 PUSHOVER_TOKEN 和 PUSHOVER_USER_KEY。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

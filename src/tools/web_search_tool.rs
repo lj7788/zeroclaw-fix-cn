@@ -303,7 +303,7 @@ impl Tool for WebSearchTool {
     }
 
     fn description(&self) -> &str {
-        "Search the web for information. Returns relevant search results with titles, URLs, and descriptions. Use this to find current information, news, or research topics."
+        "在网络上搜索信息。返回相关的搜索结果，包括标题、URL和描述。使用此工具查找当前信息、新闻或研究主题。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

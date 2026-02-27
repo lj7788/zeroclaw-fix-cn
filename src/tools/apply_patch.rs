@@ -57,7 +57,7 @@ impl Tool for ApplyPatchTool {
     }
 
     fn description(&self) -> &str {
-        "Safely check/apply a unified diff to the current git repository, optionally staging and committing."
+        "安全地检查/应用统一差异到当前 git 存储库，可选地暂存和提交。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

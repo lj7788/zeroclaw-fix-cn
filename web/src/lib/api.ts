@@ -223,8 +223,8 @@ export function storeMemory(
   }).then(() => undefined);
 }
 
-export function deleteMemory(key: string): Promise<void> {
-  return apiFetch<void>(`/api/memory/${encodeURIComponent(key)}`, {
+export function deleteMemory(key: string): Promise<{ status: string; deleted: boolean }> {
+  return apiFetch<{ status: string; deleted: boolean }>(`/api/memory/${encodeURIComponent(key)}`, {
     method: 'DELETE',
   });
 }

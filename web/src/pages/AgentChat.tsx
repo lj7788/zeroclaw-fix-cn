@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, AlertCircle } from 'lucide-react';
 import type { WsMessage } from '@/types/api';
 import { WebSocketClient } from '@/lib/ws';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ChatMessage {
   id: string;
@@ -12,7 +13,7 @@ interface ChatMessage {
 
 let fallbackMessageIdCounter = 0;
 const EMPTY_DONE_FALLBACK =
-  'Tool execution completed, but no final response text was returned.';
+  '工具执行已完成，但未返回最终响应文本。';
 
 function makeMessageId(): string {
   const uuid = globalThis.crypto?.randomUUID?.();
@@ -25,6 +26,7 @@ function makeMessageId(): string {
 }
 
 export default function AgentChat() {
+  const { isAuthenticated, loading } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
@@ -33,10 +35,12 @@ export default function AgentChat() {
 
   const wsRef = useRef<WebSocketClient | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const pendingContentRef = useRef('');
 
   useEffect(() => {
+    if (loading || !isAuthenticated) return;
+
     const ws = new WebSocketClient();
 
     ws.onOpen = () => {
@@ -49,7 +53,7 @@ export default function AgentChat() {
     };
 
     ws.onError = () => {
-      setError('Connection error. Attempting to reconnect...');
+      setError('连接错误。正在尝试重新连接...');
     };
 
     ws.onMessage = (msg: WsMessage) => {
@@ -109,7 +113,7 @@ export default function AgentChat() {
             {
               id: makeMessageId(),
               role: 'agent',
-              content: `[Error] ${msg.message ?? 'Unknown error'}`,
+              content: `[错误] ${msg.message ?? '未知错误'}`,
               timestamp: new Date(),
             },
           ]);
@@ -125,7 +129,7 @@ export default function AgentChat() {
     return () => {
       ws.disconnect();
     };
-  }, []);
+  }, [loading, isAuthenticated]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -150,8 +154,10 @@ export default function AgentChat() {
       setTyping(true);
       pendingContentRef.current = '';
     } catch {
-      setError('Failed to send message. Please try again.');
+      setError('发送消息失败。请重试。');
     }
+
+
 
     setInput('');
     inputRef.current?.focus();
@@ -179,8 +185,8 @@ export default function AgentChat() {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <Bot className="h-12 w-12 mb-3 text-gray-600" />
-            <p className="text-lg font-medium">ZeroClaw Agent</p>
-            <p className="text-sm mt-1">Send a message to start the conversation</p>
+            <p className="text-lg font-medium">ZeroClaw 智能体</p>
+            <p className="text-sm mt-1">发送消息开始对话</p>
           </div>
         )}
 
@@ -234,7 +240,7 @@ export default function AgentChat() {
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Typing...</p>
+              <p className="text-xs text-gray-500 mt-1">正在输入...</p>
             </div>
           </div>
         )}
@@ -246,15 +252,15 @@ export default function AgentChat() {
       <div className="border-t border-gray-800 bg-gray-900 p-4">
         <div className="flex items-center gap-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={connected ? 'Type a message...' : 'Connecting...'}
+              placeholder={connected ? '输入消息...' : '连接中...'}
               disabled={!connected}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              rows={4}
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 resize-none"
             />
           </div>
           <button
@@ -272,7 +278,7 @@ export default function AgentChat() {
             }`}
           />
           <span className="text-xs text-gray-500">
-            {connected ? 'Connected' : 'Disconnected'}
+            {connected ? '已连接' : '已断开'}
           </span>
         </div>
       </div>

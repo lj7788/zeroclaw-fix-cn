@@ -215,33 +215,76 @@ impl EmailChannel {
     /// Connect to IMAP server with TLS and authenticate
     async fn connect_imap(&self) -> Result<ImapSession> {
         let addr = format!("{}:{}", self.config.imap_host, self.config.imap_port);
-        debug!("Connecting to IMAP server at {}", addr);
+        info!("📧 开始连接IMAP服务器: {} (用户名: {})", addr, self.config.username);
 
         // Connect TCP
-        let tcp = TcpStream::connect(&addr).await?;
+        info!("📡 建立TCP连接到 {}", addr);
+        let tcp = TcpStream::connect(&addr).await
+            .map_err(|e| {
+                error!("❌ TCP连接失败: {}", e);
+                anyhow!("TCP连接失败: {}", e)
+            })?;
+        info!("✅ TCP连接成功");
 
         // Establish TLS using rustls
-        let certs = RootCertStore {
-            roots: webpki_roots::TLS_SERVER_ROOTS.into(),
-        };
+        info!("🔒 建立TLS连接 (使用宽松配置)");
+        let mut root_store = RootCertStore::empty();
+        root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
+        
         let config = ClientConfig::builder()
-            .with_root_certificates(certs)
+            .with_root_certificates(root_store)
             .with_no_client_auth();
         let tls_stream: TlsConnector = Arc::new(config).into();
+        // 尝试禁用SNI进行测试
+        info!("🔄 尝试带SNI的TLS连接");
         let sni: DnsName = self.config.imap_host.clone().try_into()?;
-        let stream = tls_stream.connect(sni.into(), tcp).await?;
+        let stream_result = tls_stream.connect(sni.into(), tcp).await;
+        
+        let stream = match stream_result {
+            Ok(stream) => {
+                info!("✅ 带SNI的TLS连接成功");
+                stream
+            },
+            Err(e) => {
+                error!("❌ 带SNI的TLS握手失败: {}", e);
+                error!("🔄 尝试不带SNI的连接...");
+                // 重新建立TCP连接
+                let tcp_retry = TcpStream::connect(&addr).await
+                    .map_err(|e| anyhow!("重试TCP连接失败: {}", e))?;
+                info!("✅ 重试TCP连接成功");
+                
+                // 使用IP地址作为SNI
+                let ip_sni: DnsName = "imap.126.com".try_into()?;
+                tls_stream.connect(ip_sni.into(), tcp_retry).await
+                    .map_err(|e| {
+                        error!("❌ 不带SNI的TLS握手也失败: {}", e);
+                        anyhow!("TLS握手失败: {}", e)
+                    })?
+            }
+        };
+        info!("✅ TLS连接成功");
 
         // Create IMAP client
+        info!("📧 创建IMAP客户端");
         let client = Client::new(stream);
+        info!("✅ IMAP客户端创建成功");
 
         // Authenticate using login (updated async_imap API)
-        let session = client
+        info!("🔐 开始认证 (用户名: {})", self.config.username);
+        let login_result = client
             .login(&self.config.username, &self.config.password)
-            .await
-            .map_err(|(e, _)| anyhow!("IMAP login failed: {}", e))?;
-
-        debug!("IMAP authenticate successful");
-        Ok(session)
+            .await;
+            
+        match login_result {
+            Ok(session) => {
+                info!("✅ IMAP认证成功");
+                Ok(session)
+            },
+            Err((e, _)) => {
+                error!("❌ IMAP认证失败: {}", e);
+                Err(anyhow!("IMAP认证失败: {}", e))
+            }
+        }
     }
 
     /// Fetch and process unseen messages from the selected mailbox
@@ -405,12 +448,12 @@ impl EmailChannel {
             match self.run_polling_session(&tx).await {
                 Ok(()) => {
                     // Clean exit (channel closed)
-                    return Ok(());
+                    return Ok(())
                 }
                 Err(e) => {
                     error!(
-                        "IMAP session error: {}. Reconnecting in {:?}...",
-                        e, backoff
+                        "❌ IMAP会话错误: {} (错误类型: {}). {}秒后重连...",
+                        e, std::any::type_name_of_val(&e), backoff.as_secs()
                     );
                     sleep(backoff).await;
                     // Exponential backoff with cap

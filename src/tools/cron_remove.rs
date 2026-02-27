@@ -54,7 +54,7 @@ impl Tool for CronRemoveTool {
     }
 
     fn description(&self) -> &str {
-        "Remove a cron job by id"
+        "通过 id 删除 cron 作业"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

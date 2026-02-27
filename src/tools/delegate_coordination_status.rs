@@ -35,7 +35,7 @@ impl Tool for DelegateCoordinationStatusTool {
     }
 
     fn description(&self) -> &str {
-        "Inspect delegate coordination runtime state (agent inbox backlog, context state transitions, and dead-letter events)."
+        "检查代理协调运行时状态（代理收件箱积压、上下文状态转换和死信事件）。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

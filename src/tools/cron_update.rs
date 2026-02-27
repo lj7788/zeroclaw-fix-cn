@@ -54,7 +54,7 @@ impl Tool for CronUpdateTool {
     }
 
     fn description(&self) -> &str {
-        "Patch an existing cron job (schedule, command, prompt, enabled, delivery, model, etc.)"
+        "修补现有的 cron 作业（计划、命令、提示、启用、交付、模型等）"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

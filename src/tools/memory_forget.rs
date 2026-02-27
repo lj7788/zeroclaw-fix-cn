@@ -25,7 +25,7 @@ impl Tool for MemoryForgetTool {
     }
 
     fn description(&self) -> &str {
-        "Remove a memory by key. Use to delete outdated facts or sensitive data. Returns whether the memory was found and removed."
+        "通过键删除记忆。用于删除过时的事实或敏感数据。返回记忆是否被找到并删除。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

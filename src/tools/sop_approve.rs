@@ -42,7 +42,7 @@ impl Tool for SopApproveTool {
     }
 
     fn description(&self) -> &str {
-        "Approve a pending SOP step that is waiting for operator approval. Returns the step instruction to execute. Use sop_status to see which runs are waiting."
+        "批准等待操作员批准的待处理 SOP 步骤。返回要执行的步骤指令。使用 sop_status 查看哪些运行正在等待。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

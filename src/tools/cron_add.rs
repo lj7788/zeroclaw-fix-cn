@@ -54,11 +54,7 @@ impl Tool for CronAddTool {
     }
 
     fn description(&self) -> &str {
-        "Create a scheduled cron job (shell or agent) with cron/at/every schedules. \
-         Use job_type='agent' with a prompt to run the AI agent on schedule. \
-         To deliver output to a channel (Discord, Telegram, Slack, Mattermost), set \
-         delivery={\"mode\":\"announce\",\"channel\":\"discord\",\"to\":\"<channel_id_or_chat_id>\"}. \
-         This is the preferred tool for sending scheduled/delayed messages to users via channels."
+        "创建具有 cron/at/every 计划的计划 cron 作业（shell 或 agent）。使用 job_type='agent' 和提示来按计划运行 AI 代理。要将输出传递到频道（Discord、Telegram、Slack、Mattermost），设置 delivery={\"mode\":\"announce\",\"channel\":\"discord\",\"to\":\"<channel_id_or_chat_id>\"}。这是通过频道向用户发送计划/延迟消息的首选工具。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

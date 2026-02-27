@@ -165,8 +165,8 @@ impl Tool for HttpRequestTool {
     }
 
     fn description(&self) -> &str {
-        "Make HTTP requests to external APIs. Supports GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS methods. \
-        Security constraints: allowlist-only domains, no local/private hosts, configurable timeout and response size limits."
+        "向外部 API 发送 HTTP 请求。支持 GET、POST、PUT、DELETE、PATCH、HEAD、OPTIONS 方法。\
+        安全约束：仅允许白名单域名，不允许本地/私有主机，可配置超时和响应大小限制。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

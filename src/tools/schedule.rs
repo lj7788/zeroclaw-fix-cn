@@ -27,10 +27,10 @@ impl Tool for ScheduleTool {
     }
 
     fn description(&self) -> &str {
-        "Manage scheduled shell-only tasks. Actions: create/add/once/list/get/cancel/remove/pause/resume. \
-         WARNING: This tool creates shell jobs whose output is only logged, NOT delivered to any channel. \
-         To send a scheduled message to Discord/Telegram/Slack, use the cron_add tool with job_type='agent' \
-         and a delivery config like {\"mode\":\"announce\",\"channel\":\"discord\",\"to\":\"<channel_id>\"}."
+        "管理仅执行 shell 的计划任务。操作：create/add/once/list/get/cancel/remove/pause/resume。\
+         警告：此工具创建的 shell 作业，其输出仅被记录，不会传递到任何通道。\
+         要向 Discord/Telegram/Slack 发送计划消息，请使用 cron_add 工具，设置 job_type='agent'\
+         并提供交付配置，如 {\"mode\":\"announce\",\"channel\":\"discord\",\"to\":\"<channel_id>\"}。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

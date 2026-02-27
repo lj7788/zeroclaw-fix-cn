@@ -11,7 +11,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         // ── Chat Providers ──────────────────────────────────────
         IntegrationEntry {
             name: "Telegram",
-            description: "Bot API — long-polling",
+            description: "机器人 API — 长轮询",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.telegram.is_some() {
@@ -23,7 +23,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Discord",
-            description: "Servers, channels & DMs",
+            description: "服务器、频道和私信",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.discord.is_some() {
@@ -35,7 +35,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Slack",
-            description: "Workspace apps via Web API",
+            description: "通过 Web API 的工作区应用",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.slack.is_some() {
@@ -47,7 +47,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Webhooks",
-            description: "HTTP endpoint for triggers",
+            description: "触发器的 HTTP 端点",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.webhook.is_some() {
@@ -59,7 +59,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "WhatsApp",
-            description: "Meta Cloud API via webhook",
+            description: "通过 webhook 的 Meta Cloud API",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.whatsapp.is_some() {
@@ -71,7 +71,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Signal",
-            description: "Privacy-focused via signal-cli",
+            description: "通过 signal-cli 的隐私优先",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.signal.is_some() {
@@ -83,7 +83,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "iMessage",
-            description: "macOS AppleScript bridge",
+            description: "macOS AppleScript 桥接",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.imessage.is_some() {
@@ -95,13 +95,13 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Microsoft Teams",
-            description: "Enterprise chat support",
+            description: "企业聊天支持",
             category: IntegrationCategory::Chat,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Matrix",
-            description: "Matrix protocol (Element)",
+            description: "Matrix 协议（Element）",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.matrix.is_some() {
@@ -113,31 +113,31 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Nostr",
-            description: "Decentralized DMs (NIP-04)",
+            description: "去中心化私信（NIP-04）",
             category: IntegrationCategory::Chat,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "WebChat",
-            description: "Browser-based chat UI",
+            description: "基于浏览器的聊天界面",
             category: IntegrationCategory::Chat,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Nextcloud Talk",
-            description: "Self-hosted Nextcloud chat",
+            description: "自托管的 Nextcloud 聊天",
             category: IntegrationCategory::Chat,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Zalo",
-            description: "Zalo Bot API",
+            description: "Zalo 机器人 API",
             category: IntegrationCategory::Chat,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "DingTalk",
-            description: "DingTalk Stream Mode",
+            description: "钉钉流模式",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.dingtalk.is_some() {
@@ -149,7 +149,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "QQ Official",
-            description: "Tencent QQ Bot SDK",
+            description: "腾讯 QQ 机器人 SDK",
             category: IntegrationCategory::Chat,
             status_fn: |c| {
                 if c.channels_config.qq.is_some() {
@@ -162,7 +162,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         // ── AI Models ───────────────────────────────────────────
         IntegrationEntry {
             name: "OpenRouter",
-            description: "Claude Sonnet 4.6, GPT-5.2, Gemini 3.1 Pro",
+            description: "Claude Sonnet 4.6、GPT-5.2、Gemini 3.1 Pro",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("openrouter") && c.api_key.is_some() {
@@ -174,7 +174,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Anthropic",
-            description: "Claude Sonnet 4.6, Claude Opus 4.6",
+            description: "Claude Sonnet 4.6、Claude Opus 4.6",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("anthropic") {
@@ -186,7 +186,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "OpenAI",
-            description: "GPT-5.2, GPT-5.2-Codex",
+            description: "GPT-5.2、GPT-5.2-Codex",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("openai") {
@@ -198,7 +198,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Google",
-            description: "Gemini 3.1 Pro, Gemini 3 Flash",
+            description: "Gemini 3.1 Pro、Gemini 3 Flash",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_model
@@ -213,7 +213,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "DeepSeek",
-            description: "DeepSeek-Reasoner, DeepSeek-Chat",
+            description: "DeepSeek-Reasoner、DeepSeek-Chat",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_model
@@ -228,7 +228,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "xAI",
-            description: "Grok 4, Grok 3",
+            description: "Grok 4、Grok 3",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_model
@@ -243,7 +243,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Mistral",
-            description: "Mistral Large Latest, Codestral",
+            description: "Mistral Large 最新版、Codestral",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_model
@@ -258,7 +258,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Ollama",
-            description: "Local models (Llama, etc.)",
+            description: "本地模型（Llama 等）",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("ollama") {
@@ -270,7 +270,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Perplexity",
-            description: "Sonar Pro, Sonar Reasoning Pro",
+            description: "Sonar Pro、Sonar Reasoning Pro",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("perplexity") {
@@ -282,19 +282,19 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Hugging Face",
-            description: "Open-source models",
+            description: "开源模型",
             category: IntegrationCategory::AiModel,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "LM Studio",
-            description: "Local model server",
+            description: "本地模型服务器",
             category: IntegrationCategory::AiModel,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Venice",
-            description: "Venice Llama 3.3 70B and frontier blends",
+            description: "Venice Llama 3.3 70B 和前沿混合模型",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("venice") {
@@ -306,7 +306,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Vercel AI",
-            description: "Gateway for GPT-5.2 and multi-provider routing",
+            description: "GPT-5.2 和多提供商路由的网关",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("vercel") {
@@ -318,7 +318,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Cloudflare AI",
-            description: "Workers AI + Llama 3.3 / gateway routing",
+            description: "Workers AI + Llama 3.3 / 网关路由",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("cloudflare") {
@@ -330,7 +330,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Moonshot",
-            description: "Kimi 2.5 and Kimi Coding",
+            description: "Kimi 2.5 和 Kimi Coding",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref().is_some_and(is_moonshot_alias) {
@@ -342,7 +342,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Synthetic",
-            description: "Synthetic-1 and synthetic family models",
+            description: "Synthetic-1 和 synthetic 系列模型",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("synthetic") {
@@ -354,7 +354,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "OpenCode Zen",
-            description: "OpenCode Zen and coding-specialized models",
+            description: "OpenCode Zen 和编码专用模型",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("opencode") {
@@ -366,7 +366,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Z.AI",
-            description: "GLM 4.7 and Z.AI hosted variants",
+            description: "GLM 4.7 和 Z.AI 托管变体",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref().is_some_and(is_zai_alias) {
@@ -378,7 +378,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "GLM",
-            description: "GLM 4.7 and GLM 4.5 family",
+            description: "GLM 4.7 和 GLM 4.5 系列",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref().is_some_and(is_glm_alias) {
@@ -390,7 +390,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "MiniMax",
-            description: "MiniMax M1 and latest multimodal variants",
+            description: "MiniMax M1 和最新的多模态变体",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref().is_some_and(is_minimax_alias) {
@@ -402,7 +402,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Qwen",
-            description: "Qwen Max and Qwen reasoning families",
+            description: "Qwen Max 和 Qwen 推理系列",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref().is_some_and(is_qwen_alias) {
@@ -414,7 +414,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Amazon Bedrock",
-            description: "Claude Sonnet 4.5 and Bedrock model catalog",
+            description: "Claude Sonnet 4.5 和 Bedrock 模型目录",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("bedrock") {
@@ -426,7 +426,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Qianfan",
-            description: "ERNIE 4.x and Qianfan model catalog",
+            description: "ERNIE 4.x 和千帆模型目录",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref().is_some_and(is_qianfan_alias) {
@@ -438,7 +438,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Groq",
-            description: "Llama 3.3 70B Versatile and low-latency models",
+            description: "Llama 3.3 70B 多功能和低延迟模型",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("groq") {
@@ -450,7 +450,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Together AI",
-            description: "Llama 3.3 70B Turbo and open model hosting",
+            description: "Llama 3.3 70B Turbo 和开源模型托管",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("together") {
@@ -462,7 +462,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Fireworks AI",
-            description: "DeepSeek / Llama high-throughput inference",
+            description: "DeepSeek / Llama 高吞吐量推理",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("fireworks") {
@@ -474,7 +474,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Cohere",
-            description: "Command R+ (08-2024) and embedding models",
+            description: "Command R+ (2024年8月) 和嵌入模型",
             category: IntegrationCategory::AiModel,
             status_fn: |c| {
                 if c.default_provider.as_deref() == Some("cohere") {
@@ -487,186 +487,186 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         // ── Productivity ────────────────────────────────────────
         IntegrationEntry {
             name: "GitHub",
-            description: "Code, issues, PRs",
+            description: "代码、问题、PR",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Notion",
-            description: "Workspace & databases",
+            description: "工作区和数据库",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Apple Notes",
-            description: "Native macOS/iOS notes",
+            description: "原生 macOS/iOS 笔记",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Apple Reminders",
-            description: "Task management",
+            description: "任务管理",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Obsidian",
-            description: "Knowledge graph notes",
+            description: "知识图谱笔记",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Things 3",
-            description: "GTD task manager",
+            description: "GTD 任务管理器",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Bear Notes",
-            description: "Markdown notes",
+            description: "Markdown 笔记",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Trello",
-            description: "Kanban boards",
+            description: "看板",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Linear",
-            description: "Issue tracking",
+            description: "问题跟踪",
             category: IntegrationCategory::Productivity,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         // ── Music & Audio ───────────────────────────────────────
         IntegrationEntry {
             name: "Spotify",
-            description: "Music playback control",
+            description: "音乐播放控制",
             category: IntegrationCategory::MusicAudio,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Sonos",
-            description: "Multi-room audio",
+            description: "多房间音频",
             category: IntegrationCategory::MusicAudio,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Shazam",
-            description: "Song recognition",
+            description: "歌曲识别",
             category: IntegrationCategory::MusicAudio,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         // ── Smart Home ──────────────────────────────────────────
         IntegrationEntry {
             name: "Home Assistant",
-            description: "Home automation hub",
+            description: "家庭自动化中心",
             category: IntegrationCategory::SmartHome,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Philips Hue",
-            description: "Smart lighting",
+            description: "智能照明",
             category: IntegrationCategory::SmartHome,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "8Sleep",
-            description: "Smart mattress",
+            description: "智能床垫",
             category: IntegrationCategory::SmartHome,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         // ── Tools & Automation ──────────────────────────────────
         IntegrationEntry {
             name: "Browser",
-            description: "Chrome/Chromium control",
+            description: "Chrome/Chromium 控制",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::Available,
         },
         IntegrationEntry {
             name: "Shell",
-            description: "Terminal command execution",
+            description: "终端命令执行",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::Active,
         },
         IntegrationEntry {
             name: "File System",
-            description: "Read/write files",
+            description: "读写文件",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::Active,
         },
         IntegrationEntry {
             name: "Cron",
-            description: "Scheduled tasks",
+            description: "计划任务",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::Available,
         },
         IntegrationEntry {
             name: "Voice",
-            description: "Voice wake + talk mode",
+            description: "语音唤醒 + 对话模式",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Gmail",
-            description: "Email triggers & send",
+            description: "邮件触发器和发送",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "1Password",
-            description: "Secure credentials",
+            description: "安全凭证",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Weather",
-            description: "Forecasts & conditions",
+            description: "天气预报和状况",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Canvas",
-            description: "Visual workspace + A2UI",
+            description: "可视化工作区 + A2UI",
             category: IntegrationCategory::ToolsAutomation,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         // ── Media & Creative ────────────────────────────────────
         IntegrationEntry {
             name: "Image Gen",
-            description: "AI image generation",
+            description: "AI 图像生成",
             category: IntegrationCategory::MediaCreative,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "GIF Search",
-            description: "Find the perfect GIF",
+            description: "查找完美的 GIF",
             category: IntegrationCategory::MediaCreative,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Screen Capture",
-            description: "Screenshot & screen control",
+            description: "截图和屏幕控制",
             category: IntegrationCategory::MediaCreative,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Camera",
-            description: "Photo/video capture",
+            description: "照片/视频捕获",
             category: IntegrationCategory::MediaCreative,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         // ── Social ──────────────────────────────────────────────
         IntegrationEntry {
             name: "Twitter/X",
-            description: "Tweet, reply, search",
+            description: "发推文、回复、搜索",
             category: IntegrationCategory::Social,
             status_fn: |_| IntegrationStatus::ComingSoon,
         },
         IntegrationEntry {
             name: "Email",
-            description: "IMAP/SMTP email channel",
+            description: "IMAP/SMTP 邮件频道",
             category: IntegrationCategory::Social,
             status_fn: |c| {
                 if c.channels_config.email.is_some() {
@@ -679,7 +679,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         // ── Platforms ───────────────────────────────────────────
         IntegrationEntry {
             name: "macOS",
-            description: "Native support + AppleScript",
+            description: "原生支持 + AppleScript",
             category: IntegrationCategory::Platform,
             status_fn: |_| {
                 if cfg!(target_os = "macos") {
@@ -691,7 +691,7 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Linux",
-            description: "Native support",
+            description: "原生支持",
             category: IntegrationCategory::Platform,
             status_fn: |_| {
                 if cfg!(target_os = "linux") {
@@ -703,19 +703,19 @@ pub fn all_integrations() -> Vec<IntegrationEntry> {
         },
         IntegrationEntry {
             name: "Windows",
-            description: "WSL2 recommended",
+            description: "推荐 WSL2",
             category: IntegrationCategory::Platform,
             status_fn: |_| IntegrationStatus::Available,
         },
         IntegrationEntry {
             name: "iOS",
-            description: "Chat via Telegram/Discord",
+            description: "通过 Telegram/Discord 聊天",
             category: IntegrationCategory::Platform,
             status_fn: |_| IntegrationStatus::Available,
         },
         IntegrationEntry {
             name: "Android",
-            description: "Chat via Telegram/Discord",
+            description: "通过 Telegram/Discord 聊天",
             category: IntegrationCategory::Platform,
             status_fn: |_| IntegrationStatus::Available,
         },

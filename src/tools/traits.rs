@@ -55,7 +55,7 @@ mod tests {
         }
 
         fn description(&self) -> &str {
-            "A deterministic test tool"
+            "一个确定性测试工具"
         }
 
         fn parameters_schema(&self) -> serde_json::Value {

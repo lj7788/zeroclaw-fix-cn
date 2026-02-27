@@ -40,7 +40,7 @@ use std::io::Write;
 use tracing::{info, warn};
 use tracing_subscriber::{fmt, EnvFilter};
 
-use crate::cli_i18n::{t, CliTranslations};
+mod cli_i18n;
 
 fn parse_temperature(s: &str) -> std::result::Result<f64, String> {
     let t: f64 = s.parse().map_err(|e| format!("{e}"))?;
@@ -124,7 +124,7 @@ enum EstopLevelArg {
 #[command(name = "zeroclaw")]
 #[command(author = "theonlyhennygod")]
 #[command(version)]
-#[command(about = t("cli.about").as_str(), long_about = None)]
+#[command(about = "ZeroClaw - 零开销，零妥协，100% Rust", long_about = None)]
 struct Cli {
     #[arg(long, global = true)]
     config_dir: Option<String>,

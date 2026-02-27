@@ -30,8 +30,8 @@ impl Tool for SubAgentListTool {
     }
 
     fn description(&self) -> &str {
-        "List running and completed background sub-agents. \
-         Filter by status: running, completed, failed, killed, or all (default)."
+        "列出运行中和已完成的后台子代理。\
+         按状态过滤：running（运行中）、completed（已完成）、failed（失败）、killed（已终止）或 all（全部，默认）。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

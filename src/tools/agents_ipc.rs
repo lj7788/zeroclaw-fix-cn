@@ -166,7 +166,7 @@ impl Tool for AgentsListTool {
     }
 
     fn description(&self) -> &str {
-        "List online IPC agents on this host. Returns agent IDs, roles, and last-seen timestamps for agents within the staleness window."
+        "列出此主机上的在线 IPC 代理。返回在陈旧窗口内的代理的代理 ID、角色和最后一次看到的时间戳。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -232,7 +232,7 @@ impl Tool for AgentsSendTool {
     }
 
     fn description(&self) -> &str {
-        "Send a message to another agent by ID, or broadcast to all agents with to_agent=\"*\"."
+        "通过 ID 向另一个代理发送消息，或使用 to_agent=\"*\" 广播给所有代理。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -327,7 +327,7 @@ impl Tool for AgentsInboxTool {
     }
 
     fn description(&self) -> &str {
-        "Read unread messages in this agent's inbox (including broadcasts to '*'). Direct messages are marked as read after retrieval; broadcast messages remain unread."
+        "读取此代理收件箱中的未读消息（包括广播到 '*' 的消息）。直接消息在检索后标记为已读；广播消息保持未读状态。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -398,7 +398,7 @@ impl Tool for StateGetTool {
     }
 
     fn description(&self) -> &str {
-        "Get a value from the shared inter-agent key-value store."
+        "从共享的代理间键值存储中获取值。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
@@ -484,7 +484,7 @@ impl Tool for StateSetTool {
     }
 
     fn description(&self) -> &str {
-        "Set a key-value pair in the shared inter-agent state store. Overwrites any existing value for the key."
+        "在共享的代理间状态存储中设置键值对。覆盖键的任何现有值。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

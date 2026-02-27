@@ -469,7 +469,7 @@ impl Tool for ProcessTool {
     }
 
     fn description(&self) -> &str {
-        "Manage background processes: spawn long-running commands, check output, and terminate them"
+        "管理后台进程：启动长时间运行的命令，检查输出，并终止它们"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

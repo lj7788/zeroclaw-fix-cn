@@ -53,7 +53,7 @@ export default function Cost() {
             <div className="p-2 bg-blue-600/20 rounded-lg">
               <DollarSign className="h-5 w-5 text-blue-400" />
             </div>
-            <span className="text-sm text-gray-400">Session Cost</span>
+            <span className="text-sm text-gray-400">会话成本</span>
           </div>
           <p className="text-2xl font-bold text-white">
             {formatUSD(cost.session_cost_usd)}
@@ -65,7 +65,7 @@ export default function Cost() {
             <div className="p-2 bg-green-600/20 rounded-lg">
               <TrendingUp className="h-5 w-5 text-green-400" />
             </div>
-            <span className="text-sm text-gray-400">Daily Cost</span>
+            <span className="text-sm text-gray-400">每日成本</span>
           </div>
           <p className="text-2xl font-bold text-white">
             {formatUSD(cost.daily_cost_usd)}
@@ -77,7 +77,7 @@ export default function Cost() {
             <div className="p-2 bg-purple-600/20 rounded-lg">
               <Layers className="h-5 w-5 text-purple-400" />
             </div>
-            <span className="text-sm text-gray-400">Monthly Cost</span>
+            <span className="text-sm text-gray-400">每月成本</span>
           </div>
           <p className="text-2xl font-bold text-white">
             {formatUSD(cost.monthly_cost_usd)}
@@ -89,7 +89,7 @@ export default function Cost() {
             <div className="p-2 bg-orange-600/20 rounded-lg">
               <Hash className="h-5 w-5 text-orange-400" />
             </div>
-            <span className="text-sm text-gray-400">Total Requests</span>
+            <span className="text-sm text-gray-400">请求总数</span>
           </div>
           <p className="text-2xl font-bold text-white">
             {cost.request_count.toLocaleString()}
@@ -100,17 +100,17 @@ export default function Cost() {
       {/* Token Statistics */}
       <div className="bg-gray-900 rounded-xl border border-gray-800 p-5">
         <h3 className="text-base font-semibold text-white mb-4">
-          Token Statistics
+          令牌统计
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-gray-800/50 rounded-lg p-4">
-            <p className="text-sm text-gray-400">Total Tokens</p>
+            <p className="text-sm text-gray-400">总令牌数</p>
             <p className="text-xl font-bold text-white mt-1">
               {cost.total_tokens.toLocaleString()}
             </p>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
-            <p className="text-sm text-gray-400">Avg Tokens / Request</p>
+            <p className="text-sm text-gray-400">每个请求的平均令牌数</p>
             <p className="text-xl font-bold text-white mt-1">
               {cost.request_count > 0
                 ? Math.round(cost.total_tokens / cost.request_count).toLocaleString()
@@ -118,7 +118,7 @@ export default function Cost() {
             </p>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-4">
-            <p className="text-sm text-gray-400">Cost per 1K Tokens</p>
+            <p className="text-sm text-gray-400">每个1000令牌的成本</p>
             <p className="text-xl font-bold text-white mt-1">
               {cost.total_tokens > 0
                 ? formatUSD((cost.monthly_cost_usd / cost.total_tokens) * 1000)
@@ -132,12 +132,12 @@ export default function Cost() {
       <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-800">
           <h3 className="text-base font-semibold text-white">
-            Model Breakdown
+            模型成本分布
           </h3>
         </div>
         {models.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            No model data available.
+            暂无模型数据。
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -145,19 +145,19 @@ export default function Cost() {
               <thead>
                 <tr className="border-b border-gray-800">
                   <th className="text-left px-5 py-3 text-gray-400 font-medium">
-                    Model
+                    模型
                   </th>
                   <th className="text-right px-5 py-3 text-gray-400 font-medium">
-                    Cost
+                    成本
                   </th>
                   <th className="text-right px-5 py-3 text-gray-400 font-medium">
-                    Tokens
+                    令牌数
                   </th>
                   <th className="text-right px-5 py-3 text-gray-400 font-medium">
-                    Requests
+                    请求数
                   </th>
                   <th className="text-left px-5 py-3 text-gray-400 font-medium">
-                    Share
+                    分享
                   </th>
                 </tr>
               </thead>

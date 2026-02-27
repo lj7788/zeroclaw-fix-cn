@@ -87,11 +87,11 @@ impl Tool for WebFetchTool {
     }
 
     fn description(&self) -> &str {
-        "Fetch a web page and return its content as clean plain text. \
-         HTML pages are automatically converted to readable text. \
-         JSON and plain text responses are returned as-is. \
-         Only GET requests; follows redirects. \
-         Security: allowlist-only domains, no local/private hosts."
+        "获取网页并将其内容以干净的纯文本形式返回。\
+         HTML 页面会自动转换为可读文本。\
+         JSON 和纯文本响应会原样返回。\
+         仅支持 GET 请求；会跟随重定向。\
+         安全：仅允许白名单域名，不允许本地/私有主机。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

@@ -24,7 +24,7 @@ impl Tool for FileReadTool {
     }
 
     fn description(&self) -> &str {
-        "Read file contents with line numbers. Supports partial reading via offset and limit. Extracts text from PDF; other binary files are read with lossy UTF-8 conversion."
+        "读取带有行号的文件内容。支持通过偏移量和限制进行部分读取。从 PDF 中提取文本；其他二进制文件通过有损 UTF-8 转换读取。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

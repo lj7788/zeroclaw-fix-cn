@@ -70,7 +70,7 @@ export default function Dashboard() {
     return (
       <div className="p-6">
         <div className="rounded-lg bg-red-900/30 border border-red-700 p-4 text-red-300">
-          Failed to load dashboard: {error}
+          加载仪表板失败：{error}
         </div>
       </div>
     );
@@ -95,12 +95,12 @@ export default function Dashboard() {
             <div className="p-2 bg-blue-600/20 rounded-lg">
               <Cpu className="h-5 w-5 text-blue-400" />
             </div>
-            <span className="text-sm text-gray-400">Provider / Model</span>
+            <span className="text-sm text-gray-400">提供程序 / 模型</span>
           </div>
           <p className="text-lg font-semibold text-white truncate">
-            {status.provider ?? 'Unknown'}
+            {status.provider ?? '未知'}
           </p>
-          <p className="text-sm text-gray-400 truncate">{status.model}</p>
+          <p className="text-sm text-gray-400 truncate">{status.model ?? '未知'}</p>
         </div>
 
         <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
@@ -108,12 +108,12 @@ export default function Dashboard() {
             <div className="p-2 bg-green-600/20 rounded-lg">
               <Clock className="h-5 w-5 text-green-400" />
             </div>
-            <span className="text-sm text-gray-400">Uptime</span>
+            <span className="text-sm text-gray-400">运行时间</span>
           </div>
           <p className="text-lg font-semibold text-white">
             {formatUptime(status.uptime_seconds)}
           </p>
-          <p className="text-sm text-gray-400">Since last restart</p>
+          <p className="text-sm text-gray-400">自上次重启以来</p>
         </div>
 
         <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
@@ -121,12 +121,12 @@ export default function Dashboard() {
             <div className="p-2 bg-purple-600/20 rounded-lg">
               <Globe className="h-5 w-5 text-purple-400" />
             </div>
-            <span className="text-sm text-gray-400">Gateway Port</span>
+            <span className="text-sm text-gray-400">网关端口</span>
           </div>
           <p className="text-lg font-semibold text-white">
             :{status.gateway_port}
           </p>
-          <p className="text-sm text-gray-400">Locale: {status.locale}</p>
+          <p className="text-sm text-gray-400">区域设置: {status.locale ?? '未知'}</p>  
         </div>
 
         <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
@@ -134,13 +134,13 @@ export default function Dashboard() {
             <div className="p-2 bg-orange-600/20 rounded-lg">
               <Database className="h-5 w-5 text-orange-400" />
             </div>
-            <span className="text-sm text-gray-400">Memory Backend</span>
+            <span className="text-sm text-gray-400">内存后端</span>
           </div>
           <p className="text-lg font-semibold text-white capitalize">
-            {status.memory_backend}
+            {status.memory_backend ?? '未知'} 
           </p>
           <p className="text-sm text-gray-400">
-            Paired: {status.paired ? 'Yes' : 'No'}
+            已配对: {status.paired ? '是' : '否'} 
           </p>
         </div>
       </div>
@@ -150,13 +150,13 @@ export default function Dashboard() {
         <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
           <div className="flex items-center gap-2 mb-4">
             <DollarSign className="h-5 w-5 text-blue-400" />
-            <h2 className="text-base font-semibold text-white">Cost Overview</h2>
+            <h2 className="text-base font-semibold text-white">成本概览</h2>
           </div>
           <div className="space-y-4">
             {[
-              { label: 'Session', value: cost.session_cost_usd, color: 'bg-blue-500' },
-              { label: 'Daily', value: cost.daily_cost_usd, color: 'bg-green-500' },
-              { label: 'Monthly', value: cost.monthly_cost_usd, color: 'bg-purple-500' },
+              { label: '会话成本', value: cost.session_cost_usd, color: 'bg-blue-500' },
+              { label: '日成本', value: cost.daily_cost_usd, color: 'bg-green-500' },
+              { label: '月成本', value: cost.monthly_cost_usd, color: 'bg-purple-500' },
             ].map(({ label, value, color }) => (
               <div key={label}>
                 <div className="flex justify-between text-sm mb-1">
@@ -173,11 +173,11 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="mt-4 pt-3 border-t border-gray-800 flex justify-between text-sm">
-            <span className="text-gray-400">Total Tokens</span>
+            <span className="text-gray-400">总令牌数</span>
             <span className="text-white">{cost.total_tokens.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm mt-1">
-            <span className="text-gray-400">Requests</span>
+            <span className="text-gray-400">请求数</span>
             <span className="text-white">{cost.request_count.toLocaleString()}</span>
           </div>
         </div>
@@ -186,11 +186,11 @@ export default function Dashboard() {
         <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
           <div className="flex items-center gap-2 mb-4">
             <Radio className="h-5 w-5 text-blue-400" />
-            <h2 className="text-base font-semibold text-white">Active Channels</h2>
+            <h2 className="text-base font-semibold text-white">活跃渠道</h2>
           </div>
           <div className="space-y-2">
             {Object.entries(status.channels).length === 0 ? (
-              <p className="text-sm text-gray-500">No channels configured</p>
+              <p className="text-sm text-gray-500">未配置渠道</p> 
             ) : (
               Object.entries(status.channels).map(([name, active]) => (
                 <div
@@ -205,7 +205,7 @@ export default function Dashboard() {
                       }`}
                     />
                     <span className="text-xs text-gray-400">
-                      {active ? 'Active' : 'Inactive'}
+                      {active ? '活跃' : '不活跃'}
                     </span>
                   </div>
                 </div>
@@ -218,11 +218,11 @@ export default function Dashboard() {
         <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="h-5 w-5 text-blue-400" />
-            <h2 className="text-base font-semibold text-white">Component Health</h2>
+            <h2 className="text-base font-semibold text-white">组件健康状态</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(status.health.components).length === 0 ? (
-              <p className="text-sm text-gray-500 col-span-2">No components reporting</p>
+              <p className="text-sm text-gray-500 col-span-2">未报告组件</p>
             ) : (
               Object.entries(status.health.components).map(([name, comp]) => (
                 <div
@@ -238,7 +238,7 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-400 capitalize">{comp.status}</p>
                   {comp.restart_count > 0 && (
                     <p className="text-xs text-yellow-400 mt-1">
-                      Restarts: {comp.restart_count}
+                      重启次数: {comp.restart_count}
                     </p>
                   )}
                 </div>

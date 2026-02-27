@@ -48,6 +48,9 @@ schemars = "1.2"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "ansi", "env-filter"] }
 
+# Temporary file creation
+tempfile = "3.14"
+
 # Observability - Prometheus metrics
 prometheus = { version = "0.14", default-features = false }
 
@@ -131,14 +134,16 @@ mail-parser = "0.11.2"
 async-imap = { version = "0.11",features = ["runtime-tokio"], default-features = false }
 
 # HTTP server (gateway) — replaces raw TCP for proper HTTP/1.1 compliance
-axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio", "query", "ws", "macros"] }
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio", "query", "ws", "macros", "matched-path"] }
 tower = { version = "0.5", default-features = false }
 tower-http = { version = "0.6", default-features = false, features = ["limit", "timeout"] }
 http-body-util = "0.1"
 
-# Embed frontend assets into binary (web dashboard)
-rust-embed = "8"
+# MIME type detection for static file serving
 mime_guess = "2"
+
+# Embed static files in binary (fallback if external directory not found)
+rust-embed = { version = "8", optional = true }
 
 # OpenTelemetry — OTLP trace + metrics export.
 # Use the blocking HTTP exporter client to avoid Tokio-reactor panics in
@@ -206,6 +211,13 @@ probe = ["dep:probe-rs"]
 rag-pdf = ["dep:pdf-extract"]
 # whatsapp-web = Native WhatsApp Web client with custom rusqlite storage backend
 whatsapp-web = ["dep:wa-rs", "dep:wa-rs-core", "dep:wa-rs-binary", "dep:wa-rs-proto", "dep:wa-rs-ureq-http", "dep:wa-rs-tokio-transport", "dep:serde-big-array", "dep:prost", "dep:qrcode"]
+# runtime-wasm = WASM runtime support
+runtime-wasm = []
+# firecrawl = Firecrawl web search provider
+firecrawl = []
+
+# embed-web = Embed static files in binary
+embed-web = ["dep:rust-embed"]
 
 [profile.release]
 opt-level = "z"      # Optimize for size

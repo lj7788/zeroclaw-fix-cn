@@ -520,6 +520,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'auth.logout': '退出登录',
     'auth.pairing_success': '配对成功！',
     'auth.pairing_failed': '配对失败，请重试。',
+    'auth.pairing_in_progress': '配对中...',
     'auth.enter_code': '输入配对码以连接到智能体。',
 
     // Common

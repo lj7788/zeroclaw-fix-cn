@@ -56,7 +56,7 @@ export default function Doctor() {
       const data = await runDoctor();
       setResults(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to run diagnostics');
+      setError(err instanceof Error ? err.message : '运行诊断失败');
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export default function Doctor() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Stethoscope className="h-5 w-5 text-blue-400" />
-          <h2 className="text-base font-semibold text-white">Diagnostics</h2>
+          <h2 className="text-base font-semibold text-white">诊断工具</h2>
         </div>
         <button
           onClick={handleRun}
@@ -92,12 +92,12 @@ export default function Doctor() {
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Running...
+              运行中...
             </>
           ) : (
             <>
               <Play className="h-4 w-4" />
-              Run Diagnostics
+              运行诊断
             </>
           )}
         </button>
@@ -114,9 +114,9 @@ export default function Doctor() {
       {loading && (
         <div className="flex flex-col items-center justify-center py-16">
           <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-4" />
-          <p className="text-gray-400">Running diagnostics...</p>
+          <p className="text-gray-400">运行诊断中...</p>
           <p className="text-sm text-gray-500 mt-1">
-            This may take a few seconds.
+            这可能需要几秒钟。  
           </p>
         </div>
       )}
@@ -157,15 +157,15 @@ export default function Doctor() {
             <div className="ml-auto">
               {errorCount > 0 ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-900/40 text-red-400 border border-red-700/50">
-                  Issues Found
+                  发现问题
                 </span>
               ) : warnCount > 0 ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-900/40 text-yellow-400 border border-yellow-700/50">
-                  Warnings
+                  警告
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-900/40 text-green-400 border border-green-700/50">
-                  All Clear
+                  无问题
                 </span>
               )}
             </div>
@@ -206,9 +206,9 @@ export default function Doctor() {
       {!results && !loading && !error && (
         <div className="flex flex-col items-center justify-center py-16 text-gray-500">
           <Stethoscope className="h-12 w-12 text-gray-600 mb-4" />
-          <p className="text-lg font-medium">System Diagnostics</p>
+          <p className="text-lg font-medium">系统诊断工具</p>
           <p className="text-sm mt-1">
-            Click "Run Diagnostics" to check your ZeroClaw installation.
+            点击“运行诊断”按钮来检查 ZeroClaw 安装。
           </p>
         </div>
       )}

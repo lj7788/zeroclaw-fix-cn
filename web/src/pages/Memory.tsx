@@ -28,6 +28,8 @@ export default function Memory() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
 
   // Form state
   const [formKey, setFormKey] = useState('');
@@ -60,7 +62,7 @@ export default function Memory() {
 
   const handleAdd = async () => {
     if (!formKey.trim() || !formContent.trim()) {
-      setFormError('Key and content are required.');
+      setFormError('键和内容不能为空');
       return;
     }
     setSubmitting(true);
@@ -77,7 +79,7 @@ export default function Memory() {
       setFormContent('');
       setFormCategory('');
     } catch (err: unknown) {
-      setFormError(err instanceof Error ? err.message : 'Failed to store memory');
+      setFormError(err instanceof Error ? err.message : '存储内存失败');
     } finally {
       setSubmitting(false);
     }
@@ -85,20 +87,67 @@ export default function Memory() {
 
   const handleDelete = async (key: string) => {
     try {
-      await deleteMemory(key);
-      setEntries((prev) => prev.filter((e) => e.key !== key));
+      const result = await deleteMemory(key);
+      if (result.deleted) {
+        setEntries((prev) => prev.filter((e) => e.key !== key));
+        setSelectedKeys((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(key);
+          return newSet;
+        });
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to delete memory');
+      setError(err instanceof Error ? err.message : '删除内存失败');
     } finally {
       setConfirmDelete(null);
     }
+  };
+
+  const handleBatchDelete = async () => {
+    const keysToDelete = Array.from(selectedKeys);
+    if (keysToDelete.length === 0) return;
+
+    try {
+      for (const key of keysToDelete) {
+        const result = await deleteMemory(key);
+        if (!result.deleted) {
+          throw new Error(`删除内存键 ${key} 失败`);
+        }
+      }
+      setEntries((prev) => prev.filter((e) => !selectedKeys.has(e.key)));
+      setSelectedKeys(new Set());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '批量删除失败');
+    } finally {
+      setShowBatchDeleteConfirm(false);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedKeys.size === entries.length) {
+      setSelectedKeys(new Set());
+    } else {
+      setSelectedKeys(new Set(entries.map((e) => e.key)));
+    }
+  };
+
+  const handleSelectKey = (key: string) => {
+    setSelectedKeys((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
+    });
   };
 
   if (error && entries.length === 0) {
     return (
       <div className="p-6">
         <div className="rounded-lg bg-red-900/30 border border-red-700 p-4 text-red-300">
-          Failed to load memory: {error}
+          加载内存失败: {error}
         </div>
       </div>
     );
@@ -111,16 +160,27 @@ export default function Memory() {
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-blue-400" />
           <h2 className="text-base font-semibold text-white">
-            Memory ({entries.length})
+            内存 ({entries.length})
           </h2>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Add Memory
-        </button>
+        <div className="flex items-center gap-3">
+          {selectedKeys.size > 0 && (
+            <button
+              onClick={() => setShowBatchDeleteConfirm(true)}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+              批量删除 ({selectedKeys.size})
+            </button>
+          )}
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            添加内存
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter */}
@@ -132,7 +192,7 @@ export default function Memory() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Search memory entries..."
+            placeholder="搜索内存条目..."
             className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -155,14 +215,50 @@ export default function Memory() {
           onClick={handleSearch}
           className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          Search
+          搜索
         </button>
       </div>
 
       {/* Error banner (non-fatal) */}
       {error && (
         <div className="rounded-lg bg-red-900/30 border border-red-700 p-3 text-sm text-red-300">
-          {error}
+          加载内存失败: {error}
+        </div>
+      )}
+
+      {/* Batch Delete Confirmation Modal */}
+      {showBatchDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">批量删除确认</h3>
+              <button
+                onClick={() => setShowBatchDeleteConfirm(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-gray-300 mb-6">
+              确定要删除选中的 {selectedKeys.size} 个内存条目吗？此操作无法撤销。
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowBatchDeleteConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleBatchDelete}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                确认删除
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -198,31 +294,31 @@ export default function Memory() {
                   type="text"
                   value={formKey}
                   onChange={(e) => setFormKey(e.target.value)}
-                  placeholder="e.g. user_preferences"
+                  placeholder="例如：user_preferences"
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Content <span className="text-red-400">*</span>
+                  内容 <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={formContent}
                   onChange={(e) => setFormContent(e.target.value)}
-                  placeholder="Memory content..."
+                  placeholder="内存内容..."
                   rows={4}
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Category (optional)
+                  分类 (可选)
                 </label>
                 <input
                   type="text"
                   value={formCategory}
                   onChange={(e) => setFormCategory(e.target.value)}
-                  placeholder="e.g. preferences, context, facts"
+                  placeholder="例如：preferences, context, facts"
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -236,14 +332,14 @@ export default function Memory() {
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
               >
-                Cancel
+                取消
               </button>
               <button
                 onClick={handleAdd}
                 disabled={submitting}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
               >
-                {submitting ? 'Saving...' : 'Save'}
+                {submitting ? '保存中...' : '保存'}
               </button>
             </div>
           </div>
@@ -258,7 +354,7 @@ export default function Memory() {
       ) : entries.length === 0 ? (
         <div className="bg-gray-900 rounded-xl border border-gray-800 p-8 text-center">
           <Brain className="h-10 w-10 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">No memory entries found.</p>
+          <p className="text-gray-400">暂无内存条目。</p>
         </div>
       ) : (
         <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto">
@@ -266,19 +362,27 @@ export default function Memory() {
             <thead>
               <tr className="border-b border-gray-800">
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                  Key
+                  <input
+                    type="checkbox"
+                    checked={entries.length > 0 && selectedKeys.size === entries.length}
+                    onChange={handleSelectAll}
+                    className="rounded border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
                 </th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                  Content
+                  键
                 </th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                  Category
+                  内容
                 </th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                  Timestamp
+                  分类
+                </th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium">
+                  时间戳
                 </th>
                 <th className="text-right px-4 py-3 text-gray-400 font-medium">
-                  Actions
+                  操作  
                 </th>
               </tr>
             </thead>
@@ -288,6 +392,14 @@ export default function Memory() {
                   key={entry.id}
                   className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors"
                 >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedKeys.has(entry.key)}
+                      onChange={() => handleSelectKey(entry.key)}
+                      className="rounded border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                  </td>
                   <td className="px-4 py-3 text-white font-medium font-mono text-xs">
                     {entry.key}
                   </td>
@@ -307,18 +419,18 @@ export default function Memory() {
                   <td className="px-4 py-3 text-right">
                     {confirmDelete === entry.key ? (
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-xs text-red-400">Delete?</span>
+                        <span className="text-xs text-red-400">确认删除吗？</span>
                         <button
                           onClick={() => handleDelete(entry.key)}
                           className="text-red-400 hover:text-red-300 text-xs font-medium"
                         >
-                          Yes
+                          是
                         </button>
                         <button
                           onClick={() => setConfirmDelete(null)}
                           className="text-gray-400 hover:text-white text-xs font-medium"
                         >
-                          No
+                          否
                         </button>
                       </div>
                     ) : (

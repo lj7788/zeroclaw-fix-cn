@@ -895,10 +895,10 @@ impl Tool for BrowserTool {
 
     fn description(&self) -> &str {
         concat!(
-            "Web/browser automation with pluggable backends (agent-browser, rust-native, computer_use). ",
-            "Supports DOM actions plus optional OS-level actions (mouse_move, mouse_click, mouse_drag, ",
-            "key_type, key_press, screen_capture) through a computer-use sidecar. Use 'snapshot' to map ",
-            "interactive elements to refs (@e1, @e2). Enforces browser.allowed_domains for open actions."
+            "具有可插拔后端（agent-browser、rust-native、computer_use）的 Web/浏览器自动化。 ",
+            "支持 DOM 操作以及通过计算机使用侧车进行的可选 OS 级操作（mouse_move、mouse_click、mouse_drag、 ",
+            "key_type、key_press、screen_capture）。使用 'snapshot' 将 ",
+            "交互元素映射到引用（@e1、@e2）。为打开操作强制执行 browser.allowed_domains。"
         )
     }
 

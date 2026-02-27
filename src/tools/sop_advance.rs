@@ -42,7 +42,7 @@ impl Tool for SopAdvanceTool {
     }
 
     fn description(&self) -> &str {
-        "Report the result of the current SOP step and advance to the next step. Provide the run_id, whether the step succeeded or failed, and a brief output summary."
+        "报告当前 SOP 步骤的结果并前进到下一步。提供 run_id、步骤是否成功或失败，以及简要的输出摘要。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {

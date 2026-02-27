@@ -37,11 +37,11 @@ impl Tool for ContentSearchTool {
     }
 
     fn description(&self) -> &str {
-        "Search file contents by regex pattern within the workspace. \
-         Supports ripgrep (rg) with grep fallback. \
-         Output modes: 'content' (matching lines with context), \
-         'files_with_matches' (file paths only), 'count' (match counts per file). \
-         Example: pattern='fn main', include='*.rs', output_mode='content'."
+        "在工作区中通过正则表达式模式搜索文件内容。\
+         支持 ripgrep (rg)，并以 grep 作为后备。\
+         输出模式：'content'（带上下文的匹配行），\
+         'files_with_matches'（仅文件路径），'count'（每个文件的匹配计数）。\
+         示例：pattern='fn main'，include='*.rs'，output_mode='content'。"
     }
 
     fn parameters_schema(&self) -> serde_json::Value {
