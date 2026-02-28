@@ -30,6 +30,7 @@ pub mod delegate;
 pub mod file_edit;
 pub mod file_read;
 pub mod file_write;
+pub mod gitee_tts;
 pub mod git_operations;
 pub mod glob_search;
 #[cfg(feature = "hardware")]
@@ -70,6 +71,7 @@ pub use delegate::DelegateTool;
 pub use file_edit::FileEditTool;
 pub use file_read::FileReadTool;
 pub use file_write::FileWriteTool;
+pub use gitee_tts::GiteeTtsTool;
 pub use git_operations::GitOperationsTool;
 pub use glob_search::GlobSearchTool;
 #[cfg(feature = "hardware")]
@@ -344,11 +346,28 @@ pub fn all_tools_with_runtime(
                     .map(std::path::PathBuf::from),
                 secrets_encrypt: root_config.secrets.encrypt,
                 reasoning_enabled: root_config.runtime.reasoning_enabled,
+                extra_headers: std::collections::HashMap::new(),
             },
         )
         .with_parent_tools(parent_tools)
         .with_multimodal_config(root_config.multimodal.clone());
         tool_arcs.push(Arc::new(delegate_tool));
+    }
+
+    // Add Gitee TTS tool when using Gitee AI provider
+    let is_gitee_provider = root_config
+        .default_provider
+        .as_ref()
+        .map(|p| p.contains("ai.gitee.com"))
+        .unwrap_or(false);
+    if is_gitee_provider {
+        // Use the first API key from reliability config
+        if let Some(api_key) = root_config.reliability.api_keys.first() {
+            tracing::info!("Adding Gitee TTS tool for Gitee AI provider");
+            tool_arcs.push(Arc::new(GiteeTtsTool::new(api_key.clone())));
+        } else {
+            tracing::warn!("Gitee AI provider detected but no API key found in reliability.api_keys");
+        }
     }
 
     boxed_registry_from_arcs(tool_arcs)

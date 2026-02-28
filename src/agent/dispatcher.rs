@@ -71,6 +71,17 @@ impl XmlToolDispatcher {
             ("<poetry_text>", "</poetry_text>"),
             ("<poem_content>", "</poem_content>"),
             ("<poetry_content>", "</poetry_content>"),
+            // TTS tool aliases
+            ("<text_to_speech>", "</text_to_speech>"),
+            ("<text_to_speech", ">"),
+            ("<voice_say>", "</voice_say>"),
+            ("<voice_say", ">"),
+            ("<speak>", "</speak>"),
+            ("<speak", ">"),
+            ("<say>", "</say>"),
+            ("<say", ">"),
+            ("<tts>", "</tts>"),
+            ("<tts", ">"),
         ];
 
         let mut current = remaining;
@@ -86,11 +97,20 @@ impl XmlToolDispatcher {
                         }
                     }
 
-                    if let Some(end) = current[start..].find(close_tag) {
+                    // Try to find closing tag, if not found, use rest of string
+                    let (end_pos, inner) = if let Some(end) = current[start..].find(close_tag) {
                         let end_pos = start + end + close_tag.len();
                         let inner = &current[start + open_tag.len()..start + end];
+                        (end_pos, inner)
+                    } else {
+                        // No closing tag found - use rest of string as content
+                        let end_pos = current.len();
+                        let inner = &current[start + open_tag.len()..end_pos];
+                        (end_pos, inner)
+                    };
 
-                        if open_tag.starts_with("<tool") || *open_tag == "<invoke>" {
+                    if open_tag.starts_with("<tool") || *open_tag == "<invoke>" {
+                            // First try to parse as standard JSON format: {"name": "...", "arguments": {...}}
                             if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(inner.trim()) {
                                 let name = parsed.get("name").and_then(serde_json::Value::as_str).unwrap_or("").to_string();
                                 if !name.is_empty() {
@@ -104,39 +124,109 @@ impl XmlToolDispatcher {
                                     text_parts.push(inner.trim().to_string());
                                 }
                             } else {
-                                let tag_content = open_tag.trim_start_matches("<").trim_end_matches(">");
-                                let mut parts = tag_content.split_whitespace();
-                                if let Some(name) = parts.next() {
-                                    if name.starts_with("tool") || name == "invoke" {
-                                        let mut arguments = serde_json::Map::new();
-                                        for part in parts {
-                                            if let Some((key, value)) = part.split_once('=') {
-                                                let value = value.trim_matches('"');
-                                                arguments.insert(key.to_string(), serde_json::Value::String(value.to_string()));
+                                // Try to parse format: tool_name\n{"arg": "value"} or tool_name\narg=value\narg2=value2
+                                let inner_trimmed = inner.trim();
+                                if let Some(first_line_end) = inner_trimmed.find('\n') {
+                                    let first_line = &inner_trimmed[..first_line_end].trim();
+                                    let rest = &inner_trimmed[first_line_end..].trim();
+                                    
+                                    // Check if first line is a tool name (not JSON)
+                                    if !first_line.is_empty() && !first_line.starts_with('{') {
+                                        let tool_name = first_line.to_string();
+                                        // Try to parse the rest as JSON arguments first
+                                        let arguments = if let Ok(args) = serde_json::from_str::<serde_json::Value>(rest) {
+                                            args
+                                        } else {
+                                            // Try to parse as key=value lines
+                                            let mut args_map = serde_json::Map::new();
+                                            for line in rest.lines() {
+                                                let line_trimmed = line.trim();
+                                                if let Some((key, value)) = line_trimmed.split_once('=') {
+                                                    let value = value.trim().trim_matches('"').trim_matches('\'');
+                                                    args_map.insert(key.trim().to_string(), serde_json::Value::String(value.to_string()));
+                                                }
                                             }
-                                        }
+                                            serde_json::Value::Object(args_map)
+                                        };
                                         calls.push(ParsedToolCall {
-                                            name: name.to_string(),
-                                            arguments: serde_json::Value::Object(arguments),
+                                            name: tool_name,
+                                            arguments,
                                             tool_call_id: None,
                                         });
                                     } else {
                                         text_parts.push(inner.trim().to_string());
                                     }
                                 } else {
-                                    text_parts.push(inner.trim().to_string());
+                                    // Single line content, check if it's a tool name
+                                    let tag_content = open_tag.trim_start_matches("<").trim_end_matches(">");
+                                    let mut parts = tag_content.split_whitespace();
+                                    if let Some(name) = parts.next() {
+                                        if name.starts_with("tool") || name == "invoke" {
+                                            let mut arguments = serde_json::Map::new();
+                                            for part in parts {
+                                                if let Some((key, value)) = part.split_once('=') {
+                                                    let value = value.trim_matches('"');
+                                                    arguments.insert(key.to_string(), serde_json::Value::String(value.to_string()));
+                                                }
+                                            }
+                                            calls.push(ParsedToolCall {
+                                                name: name.to_string(),
+                                                arguments: serde_json::Value::Object(arguments),
+                                                tool_call_id: None,
+                                            });
+                                        } else {
+                                            text_parts.push(inner.trim().to_string());
+                                        }
+                                    } else {
+                                        text_parts.push(inner.trim().to_string());
+                                    }
                                 }
                             }
                         } else if open_tag.starts_with("<poetry") || open_tag.starts_with("<poem") || *open_tag == "<output>" || *open_tag == "<trash>" {
                             text_parts.push(inner.trim().to_string());
-                        } else {
-                            text_parts.push(inner.trim().to_string());
-                        }
-
-                        current = &current[end_pos..];
-                        found = true;
-                        break;
+                        } else if open_tag.starts_with("<text_to_speech") || open_tag.starts_with("<voice_say") || 
+                                  open_tag.starts_with("<speak") || open_tag.starts_with("<say") || open_tag.starts_with("<tts") {
+                            // Handle TTS tool tags - extract attributes from tag and content
+                            let tag_content = open_tag.trim_start_matches('<').trim_end_matches('>');
+                            let mut parts = tag_content.split_whitespace();
+                            let tag_name = parts.next().unwrap_or("");
+                            
+                            // Map tag name to tool name
+                            let tool_name = match tag_name {
+                                "text_to_speech" | "tts" => "tts",
+                                "voice_say" => "tts",
+                                "speak" | "say" => "tts",
+                                _ => "tts",
+                            };
+                            
+                            let mut arguments = serde_json::Map::new();
+                            
+                            // Parse attributes from tag
+                            for part in parts {
+                                if let Some((key, value)) = part.split_once('=') {
+                                    let value = value.trim_matches('"');
+                                    arguments.insert(key.to_string(), serde_json::Value::String(value.to_string()));
+                                }
+                            }
+                            
+                            // If inner content exists and text is not already set, use it as text
+                            let inner_trimmed = inner.trim();
+                            if !inner_trimmed.is_empty() && !arguments.contains_key("text") {
+                                arguments.insert("text".to_string(), serde_json::Value::String(inner_trimmed.to_string()));
+                            }
+                            
+                            calls.push(ParsedToolCall {
+                                name: tool_name.to_string(),
+                                arguments: serde_json::Value::Object(arguments),
+                                tool_call_id: None,
+                            });
+                    } else {
+                        text_parts.push(inner.trim().to_string());
                     }
+
+                    current = &current[end_pos..];
+                    found = true;
+                    break;
                 }
             }
 

@@ -312,8 +312,14 @@ fn build_hardware_context(
 }
 
 /// Find a tool by name in the registry.
+/// Supports tool name aliases for compatibility.
 fn find_tool<'a>(tools: &'a [Box<dyn Tool>], name: &str) -> Option<&'a dyn Tool> {
-    tools.iter().find(|t| t.name() == name).map(|t| t.as_ref())
+    // Map tool name aliases to actual tool names
+    let tool_name = match name {
+        "voice_say" | "text_to_speech" | "speak" | "say" => "tts",
+        _ => name,
+    };
+    tools.iter().find(|t| t.name() == tool_name).map(|t| t.as_ref())
 }
 
 fn parse_arguments_value(raw: Option<&serde_json::Value>) -> serde_json::Value {
@@ -2808,6 +2814,7 @@ pub async fn run(
         zeroclaw_dir: config.config_path.parent().map(std::path::PathBuf::from),
         secrets_encrypt: config.secrets.encrypt,
         reasoning_enabled: config.runtime.reasoning_enabled,
+        extra_headers: std::collections::HashMap::new(),
     };
 
     let provider: Box<dyn Provider> = providers::create_routed_provider_with_options(
@@ -3266,6 +3273,7 @@ pub async fn process_message(config: Config, message: &str) -> Result<String> {
         zeroclaw_dir: config.config_path.parent().map(std::path::PathBuf::from),
         secrets_encrypt: config.secrets.encrypt,
         reasoning_enabled: config.runtime.reasoning_enabled,
+        extra_headers: std::collections::HashMap::new(),
     };
     let provider: Box<dyn Provider> = providers::create_routed_provider_with_options(
         provider_name,
@@ -3306,6 +3314,7 @@ pub async fn process_message(config: Config, message: &str) -> Result<String> {
         ),
         ("screenshot", "Capture a screenshot."),
         ("image_info", "Read image metadata."),
+        ("tts", "Text-to-Speech (TTS) - convert text to spoken audio file. Use this tool when the user asks to convert text to speech, speak text, generate audio, or any voice-related request. Input: text content. Output: URL to download the generated audio file."),
     ];
     if config.browser.enabled {
         tool_descs.push(("browser_open", "Open approved URLs in browser."));

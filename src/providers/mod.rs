@@ -676,6 +676,7 @@ pub struct ProviderRuntimeOptions {
     pub zeroclaw_dir: Option<PathBuf>,
     pub secrets_encrypt: bool,
     pub reasoning_enabled: Option<bool>,
+    pub extra_headers: std::collections::HashMap<String, String>,
 }
 
 impl Default for ProviderRuntimeOptions {
@@ -686,6 +687,7 @@ impl Default for ProviderRuntimeOptions {
             zeroclaw_dir: None,
             secrets_encrypt: true,
             reasoning_enabled: None,
+            extra_headers: std::collections::HashMap::new(),
         }
     }
 }
@@ -843,6 +845,8 @@ fn resolve_provider_credential(name: &str, credential_override: Option<&str>) ->
         "cloudflare" | "cloudflare-ai" => vec!["CLOUDFLARE_API_KEY"],
         "ovhcloud" | "ovh" => vec!["OVH_AI_ENDPOINTS_ACCESS_TOKEN"],
         "astrai" => vec!["ASTRAI_API_KEY"],
+        "custom" => vec!["API_KEY"],
+        name if name.starts_with("custom:") => vec!["API_KEY"],
         "llamacpp" | "llama.cpp" => vec!["LLAMACPP_API_KEY"],
         "sglang" => vec!["SGLANG_API_KEY"],
         "vllm" => vec!["VLLM_API_KEY"],
@@ -1216,13 +1220,36 @@ fn create_provider_with_url_and_options(
                 "Custom provider",
                 "custom:https://your-api.com",
             )?;
-            Ok(Box::new(OpenAiCompatibleProvider::new_with_vision(
-                "Custom",
-                &base_url,
-                key,
-                AuthStyle::Bearer,
-                true,
-            )))
+            let is_gitee = base_url.contains("ai.gitee.com");
+            let provider_name = if is_gitee { "Gitee AI" } else { "Custom" };
+            // Gitee AI uses standard Bearer authentication like OpenAI
+            let auth_style = AuthStyle::Bearer;
+            
+            // Gitee AI does not support native tool calling, use XML-based tool calling instead
+            if is_gitee {
+                Ok(Box::new(OpenAiCompatibleProvider::new_without_native_tools(
+                    provider_name,
+                    &base_url,
+                    key,
+                    auth_style,
+                )))
+            } else if options.extra_headers.is_empty() {
+                Ok(Box::new(OpenAiCompatibleProvider::new_with_vision(
+                    provider_name,
+                    &base_url,
+                    key,
+                    auth_style,
+                    true,
+                )))
+            } else {
+                Ok(Box::new(OpenAiCompatibleProvider::new_with_extra_headers(
+                    provider_name,
+                    &base_url,
+                    key,
+                    auth_style,
+                    options.extra_headers.clone(),
+                )))
+            }
         }
 
         // ── Anthropic-compatible custom endpoints ───────────
@@ -1270,12 +1297,22 @@ pub fn create_resilient_provider(
     api_url: Option<&str>,
     reliability: &crate::config::ReliabilityConfig,
 ) -> anyhow::Result<Box<dyn Provider>> {
+    let mut options = ProviderRuntimeOptions::default();
+    let is_gitee = primary_name.contains("ai.gitee.com") 
+        || api_url.map(|u| u.contains("ai.gitee.com")).unwrap_or(false);
+    if is_gitee {
+        options.extra_headers.insert("X-Failover-Enabled".to_string(), "true".to_string());
+    }
+    // Use api_keys from reliability if available
+    let effective_api_key = api_key.or_else(|| {
+        reliability.api_keys.first().map(|k| k.as_str())
+    });
     create_resilient_provider_with_options(
         primary_name,
-        api_key,
+        effective_api_key,
         api_url,
         reliability,
-        &ProviderRuntimeOptions::default(),
+        &options,
     )
 }
 
@@ -1287,13 +1324,24 @@ pub fn create_resilient_provider_with_options(
     reliability: &crate::config::ReliabilityConfig,
     options: &ProviderRuntimeOptions,
 ) -> anyhow::Result<Box<dyn Provider>> {
+    let is_gitee = primary_name.contains("ai.gitee.com") 
+        || api_url.map(|u| u.contains("ai.gitee.com")).unwrap_or(false);
+    let mut options_with_gitee = options.clone();
+    if is_gitee {
+        options_with_gitee.extra_headers.insert("X-Failover-Enabled".to_string(), "true".to_string());
+    }
     let mut providers: Vec<(String, Box<dyn Provider>)> = Vec::new();
+
+    // Use api_keys from reliability if available
+    let effective_api_key = api_key.or_else(|| {
+        reliability.api_keys.first().map(|k| k.as_str())
+    });
 
     let primary_provider = match primary_name {
         "openai-codex" | "openai_codex" | "codex" => {
-            create_provider_with_options(primary_name, api_key, options)?
+            create_provider_with_options(primary_name, effective_api_key, &options_with_gitee)?
         }
-        _ => create_provider_with_url_and_options(primary_name, api_key, api_url, options)?,
+        _ => create_provider_with_url_and_options(primary_name, effective_api_key, api_url, &options_with_gitee)?,
     };
     providers.push((primary_name.to_string(), primary_provider));
 

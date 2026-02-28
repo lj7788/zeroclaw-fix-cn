@@ -389,11 +389,36 @@ impl Agent {
     async fn execute_tool_call(&self, call: &ParsedToolCall) -> ToolExecutionResult {
         let start = Instant::now();
 
-        let result = if let Some(tool) = self.tools.iter().find(|t| t.name() == call.name) {
-            match tool.execute(call.arguments.clone()).await {
+        // Map tool name aliases to actual tool names
+        let tool_name = match call.name.as_str() {
+            "voice_say" | "text_to_speech" | "speak" | "say" => "tts",
+            _ => &call.name,
+        };
+
+        // Map argument names for TTS tool
+        let arguments = if tool_name == "tts" {
+            let mut args = call.arguments.clone();
+            // Handle language/lang parameter mapping
+            let has_lang = args.get("lang").is_some();
+            let language_val = args.get("language").and_then(|v| v.as_str()).map(|s| s.to_string());
+            if let Some(lang) = language_val {
+                // If 'language' is provided but 'lang' is not, add it for compatibility
+                if !has_lang {
+                    if let Some(obj) = args.as_object_mut() {
+                        obj.insert("lang".to_string(), serde_json::Value::String(lang));
+                    }
+                }
+            }
+            args
+        } else {
+            call.arguments.clone()
+        };
+
+        let result = if let Some(tool) = self.tools.iter().find(|t| t.name() == tool_name) {
+            match tool.execute(arguments).await {
                 Ok(r) => {
                     self.observer.record_event(&ObserverEvent::ToolCall {
-                        tool: call.name.clone(),
+                        tool: tool_name.to_string(),
                         duration: start.elapsed(),
                         success: r.success,
                     });
@@ -405,11 +430,11 @@ impl Agent {
                 }
                 Err(e) => {
                     self.observer.record_event(&ObserverEvent::ToolCall {
-                        tool: call.name.clone(),
+                        tool: tool_name.to_string(),
                         duration: start.elapsed(),
                         success: false,
                     });
-                    format!("Error executing {}: {e}", call.name)
+                    format!("Error executing {}: {e}", tool_name)
                 }
             }
         } else {
@@ -417,10 +442,11 @@ impl Agent {
             format!("The tool '{}' is not available. Please directly answer the user's request without using tools.", call.name)
         };
 
+        let success = !result.starts_with("Error") && !result.starts_with("The tool");
         ToolExecutionResult {
-            name: call.name.clone(),
+            name: tool_name.to_string(),
             output: result,
-            success: true,
+            success,
             tool_call_id: call.tool_call_id.clone(),
         }
     }

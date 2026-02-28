@@ -9,6 +9,7 @@ interface ChatMessage {
   role: 'user' | 'agent';
   content: string;
   timestamp: Date;
+  audioUrl?: string;
 }
 
 let fallbackMessageIdCounter = 0;
@@ -95,17 +96,43 @@ export default function AgentChat() {
           ]);
           break;
 
-        case 'tool_result':
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: makeMessageId(),
-              role: 'agent',
-              content: `[Tool Result] ${msg.output ?? ''}`,
-              timestamp: new Date(),
-            },
-          ]);
+        case 'tool_result': {
+          const output = msg.output ?? '';
+          // Check if output is JSON with audio URL
+          let audioUrl = null;
+          try {
+            const parsed = JSON.parse(output);
+            if (parsed.type === 'audio' && parsed.url) {
+              audioUrl = parsed.url;
+            }
+          } catch {
+            // Not JSON, treat as plain text
+          }
+          
+          if (audioUrl) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: makeMessageId(),
+                role: 'agent',
+                content: `🎵 语音已生成`,
+                audioUrl,
+                timestamp: new Date(),
+              },
+            ]);
+          } else {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: makeMessageId(),
+                role: 'agent',
+                content: `[Tool Result] ${output}`,
+                timestamp: new Date(),
+              },
+            ]);
+          }
           break;
+        }
 
         case 'error':
           setMessages((prev) => [
@@ -218,6 +245,21 @@ export default function AgentChat() {
               }`}
             >
               <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+              {msg.audioUrl && (
+                <div className="mt-2">
+                  <audio controls className="w-full max-w-[300px]" src={msg.audioUrl}>
+                    您的浏览器不支持音频播放
+                  </audio>
+                  <a 
+                    href={msg.audioUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-400 hover:text-blue-300 mt-1 inline-block"
+                  >
+                    下载音频
+                  </a>
+                </div>
+              )}
               <p
                 className={`text-xs mt-1 ${
                   msg.role === 'user' ? 'text-blue-200' : 'text-gray-500'

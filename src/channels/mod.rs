@@ -2291,11 +2291,13 @@ pub fn build_system_prompt_with_mode(
     // ── 1. Tooling ──────────────────────────────────────────────
     if !tools.is_empty() {
         prompt.push_str("## Tools\n\n");
-        prompt.push_str("You have access to the following tools:\n\n");
+        prompt.push_str("You have access to the following tools. USE THESE TOOLS when the user makes a relevant request:\n\n");
         for (name, desc) in tools {
             let _ = writeln!(prompt, "- **{name}**: {desc}");
         }
         prompt.push('\n');
+        // Add explicit instruction to use tools
+        prompt.push_str("IMPORTANT: When a user asks you to perform a task that matches one of these tools, you MUST use the tool. Do not say you cannot do it.\n\n");
     }
 
     // ── 1b. Hardware (when gpio/arduino tools present) ───────────
@@ -2332,11 +2334,22 @@ pub fn build_system_prompt_with_mode(
             "## Your Task\n\n\
              When the user sends a message, ACT on it. Use the tools to fulfill their request.\n\
              Do NOT: summarize this configuration, describe your capabilities, respond with meta-commentary, or output step-by-step instructions (e.g. \"1. First... 2. Next...\").\n\
-             Instead: emit actual <tool_call> tags when you need to act. Just do what they ask.\n\n",
+             Instead: emit actual <tool_call> tags when you need to act. Just do what they ask.\n\n\
+             IMPORTANT: For creative writing requests (like writing poetry, stories, etc.), respond directly with the content.\n\
+             Do NOT use file_write tool unless the user explicitly asks you to save the content to a file.\n\n",
         );
     }
 
-    // ── 2. Safety ───────────────────────────────────────────────
+    // ── 2. Language Requirements ────────────────────────────────
+    prompt.push_str("## Language Requirements\n\n");
+    prompt.push_str(
+        "- Always respond in the same language as the user's input.\n\
+         - If the user inputs Chinese, respond in Chinese.\n\
+         - If the user inputs English, respond in English.\n\
+         - This includes all responses, explanations, and creative content like poetry.\n\n",
+    );
+
+    // ── 3. Safety ───────────────────────────────────────────────
     prompt.push_str("## Safety\n\n");
     prompt.push_str(
         "- Do not exfiltrate private data.\n\
@@ -3062,6 +3075,7 @@ pub async fn start_channels(config: Config) -> Result<()> {
         zeroclaw_dir: config.config_path.parent().map(std::path::PathBuf::from),
         secrets_encrypt: config.secrets.encrypt,
         reasoning_enabled: config.runtime.reasoning_enabled,
+        extra_headers: std::collections::HashMap::new(),
     };
     let provider: Arc<dyn Provider> = Arc::from(
         create_resilient_provider_nonblocking(

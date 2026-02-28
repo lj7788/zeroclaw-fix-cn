@@ -37,6 +37,8 @@ pub struct OpenAiCompatibleProvider {
     /// Whether this provider supports OpenAI-style native tool calling.
     /// When false, tools are injected into the system prompt as text.
     native_tool_calling: bool,
+    /// Extra HTTP headers to add to each request (e.g. for Gitee AI)
+    extra_headers: std::collections::HashMap<String, String>,
 }
 
 /// How the provider expects the API key to be sent.
@@ -150,6 +152,49 @@ impl OpenAiCompatibleProvider {
         )
     }
 
+    pub fn new_with_extra_headers(
+        name: &str,
+        base_url: &str,
+        credential: Option<&str>,
+        auth_style: AuthStyle,
+        extra_headers: std::collections::HashMap<String, String>,
+    ) -> Self {
+        Self {
+            name: name.to_string(),
+            base_url: base_url.trim_end_matches('/').to_string(),
+            credential: credential.map(ToString::to_string),
+            auth_header: auth_style,
+            supports_vision: false,
+            supports_responses_fallback: true,
+            user_agent: None,
+            merge_system_into_user: false,
+            native_tool_calling: true,
+            extra_headers,
+        }
+    }
+
+    /// For providers that do not support native tool calling (e.g. Gitee AI).
+    /// Tool calling is handled via XML parsing in prompts instead.
+    pub fn new_without_native_tools(
+        name: &str,
+        base_url: &str,
+        credential: Option<&str>,
+        auth_style: AuthStyle,
+    ) -> Self {
+        Self {
+            name: name.to_string(),
+            base_url: base_url.trim_end_matches('/').to_string(),
+            credential: credential.map(ToString::to_string),
+            auth_header: auth_style,
+            supports_vision: false,
+            supports_responses_fallback: true,
+            user_agent: None,
+            merge_system_into_user: false,
+            native_tool_calling: false,
+            extra_headers: std::collections::HashMap::new(),
+        }
+    }
+
     fn new_with_options(
         name: &str,
         base_url: &str,
@@ -170,6 +215,7 @@ impl OpenAiCompatibleProvider {
             user_agent: user_agent.map(ToString::to_string),
             merge_system_into_user,
             native_tool_calling: !merge_system_into_user,
+            extra_headers: std::collections::HashMap::new(),
         }
     }
 
@@ -817,11 +863,15 @@ impl OpenAiCompatibleProvider {
         req: reqwest::RequestBuilder,
         credential: &str,
     ) -> reqwest::RequestBuilder {
-        match &self.auth_header {
+        let mut req = match &self.auth_header {
             AuthStyle::Bearer => req.header("Authorization", format!("Bearer {credential}")),
             AuthStyle::XApiKey => req.header("x-api-key", credential),
             AuthStyle::Custom(header) => req.header(header, credential),
+        };
+        for (key, value) in &self.extra_headers {
+            req = req.header(key.as_str(), value.as_str());
         }
+        req
     }
 
     async fn chat_via_responses(

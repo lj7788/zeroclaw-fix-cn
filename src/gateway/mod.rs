@@ -355,6 +355,7 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
             zeroclaw_dir: config.config_path.parent().map(std::path::PathBuf::from),
             secrets_encrypt: config.secrets.encrypt,
             reasoning_enabled: config.runtime.reasoning_enabled,
+            extra_headers: std::collections::HashMap::new(),
         },
     )?);
     let model = config
@@ -401,6 +402,8 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
     );
     let tools_registry: Arc<Vec<ToolSpec>> =
         Arc::new(tools_registry_raw.iter().map(|t| t.spec()).collect());
+    let tools_registry_exec: Option<Arc<Vec<Box<dyn crate::tools::traits::Tool>>>> =
+        Some(Arc::new(tools_registry_raw));
 
     // Cost tracker (optional)
     let cost_tracker = if config.cost.enabled {
@@ -649,7 +652,7 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         wati: wati_channel,
         observer: broadcast_observer,
         tools_registry,
-        tools_registry_exec: None,
+        tools_registry_exec,
         multimodal: Default::default(),
         max_tool_iterations: 5,
         cost_tracker,
@@ -667,6 +670,7 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         .route("/health", get(handle_health))
         .route("/metrics", get(handle_metrics))
         .route("/pair", post(handle_pair))
+        .route("/agent", post(handle_agent))
         .route("/webhook", post(handle_webhook))
         .route("/whatsapp", get(handle_whatsapp_verify))
         .route("/whatsapp", post(handle_whatsapp_message))
@@ -995,7 +999,7 @@ async fn handle_webhook(
             messages_count: 1,
         });
 
-    match run_gateway_chat_simple(&state, message).await {
+    match run_gateway_chat_with_tools(&state, message).await {
         Ok(response) => {
             let duration = started_at.elapsed();
             state
@@ -1075,6 +1079,151 @@ pub struct WhatsAppVerifyQuery {
     pub verify_token: Option<String>,
     #[serde(rename = "hub.challenge")]
     pub challenge: Option<String>,
+}
+
+/// POST /agent — agent endpoint for tool-enabled chat
+async fn handle_agent(
+    State(state): State<AppState>,
+    ConnectInfo(peer_addr): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    body: Result<Json<WebhookBody>, axum::extract::rejection::JsonRejection>,
+) -> impl IntoResponse {
+    let rate_key =
+        client_key_from_request(Some(peer_addr), &headers, state.trust_forwarded_headers);
+    if !state.rate_limiter.allow_webhook(&rate_key) {
+        tracing::warn!("/agent rate limit exceeded");
+        let err = serde_json::json!({
+            "error": "Too many agent requests. Please retry later.",
+            "retry_after": RATE_LIMIT_WINDOW_SECS,
+        });
+        return (StatusCode::TOO_MANY_REQUESTS, Json(err));
+    }
+
+    // ── Bearer token auth (pairing) ──
+    if state.pairing.require_pairing() {
+        let auth = headers
+            .get(header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("");
+        let token = auth.strip_prefix("Bearer ").unwrap_or("");
+        if !state.pairing.is_authenticated(token) {
+            tracing::warn!("Agent: rejected — not paired / invalid bearer token");
+            let err = serde_json::json!({
+                "error": "Unauthorized — pair first via POST /pair, then send Authorization: Bearer <token>"
+            });
+            return (StatusCode::UNAUTHORIZED, Json(err));
+        }
+    }
+
+    let Json(body) = match body {
+        Ok(b) => b,
+        Err(e) => {
+            tracing::warn!("Agent: invalid JSON body: {}", e);
+            let err = serde_json::json!({"error": "Invalid JSON body"});
+            return (StatusCode::BAD_REQUEST, Json(err));
+        }
+    };
+
+    let message = body.message.trim();
+    if message.is_empty() {
+        let err = serde_json::json!({"error": "Missing 'message' field"});
+        return (StatusCode::BAD_REQUEST, Json(err));
+    }
+
+    tracing::info!("Agent: processing message: {}", message);
+
+    let started_at = std::time::Instant::now();
+    let provider_label = state
+        .config
+        .lock()
+        .default_provider
+        .clone()
+        .unwrap_or_else(|| "unknown".to_string());
+    let model_label = state.model.clone();
+
+    state
+        .observer
+        .record_event(&crate::observability::ObserverEvent::AgentStart {
+            provider: provider_label.clone(),
+            model: model_label.clone(),
+        });
+    state
+        .observer
+        .record_event(&crate::observability::ObserverEvent::LlmRequest {
+            provider: provider_label.clone(),
+            model: model_label.clone(),
+            messages_count: 1,
+        });
+
+    match run_gateway_chat_with_tools(&state, message).await {
+        Ok(response) => {
+            let duration = started_at.elapsed();
+            state
+                .observer
+                .record_event(&crate::observability::ObserverEvent::LlmResponse {
+                    provider: provider_label.clone(),
+                    model: model_label.clone(),
+                    duration,
+                    success: true,
+                    error_message: None,
+                    input_tokens: None,
+                    output_tokens: None,
+                });
+            state.observer.record_metric(
+                &crate::observability::traits::ObserverMetric::RequestLatency(duration),
+            );
+            state
+                .observer
+                .record_event(&crate::observability::ObserverEvent::AgentEnd {
+                    provider: provider_label,
+                    model: model_label,
+                    duration,
+                    tokens_used: None,
+                    cost_usd: None,
+                });
+
+            let body = serde_json::json!({"response": response, "model": state.model});
+            (StatusCode::OK, Json(body))
+        }
+        Err(e) => {
+            let duration = started_at.elapsed();
+            let sanitized = providers::sanitize_api_error(&e.to_string());
+
+            state
+                .observer
+                .record_event(&crate::observability::ObserverEvent::LlmResponse {
+                    provider: provider_label.clone(),
+                    model: model_label.clone(),
+                    duration,
+                    success: false,
+                    error_message: Some(sanitized.clone()),
+                    input_tokens: None,
+                    output_tokens: None,
+                });
+            state.observer.record_metric(
+                &crate::observability::traits::ObserverMetric::RequestLatency(duration),
+            );
+            state
+                .observer
+                .record_event(&crate::observability::ObserverEvent::Error {
+                    component: "gateway".to_string(),
+                    message: sanitized.clone(),
+                });
+            state
+                .observer
+                .record_event(&crate::observability::ObserverEvent::AgentEnd {
+                    provider: provider_label,
+                    model: model_label,
+                    duration,
+                    tokens_used: None,
+                    cost_usd: None,
+                });
+
+            tracing::error!("Agent provider error: {}", sanitized);
+            let err = serde_json::json!({"error": "LLM request failed"});
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(err))
+        }
+    }
 }
 
 /// GET /whatsapp — Meta webhook verification

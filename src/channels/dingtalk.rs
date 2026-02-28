@@ -262,7 +262,13 @@ impl Channel for DingTalkChannel {
                             let content = content.to_string();
                             let http_client = self.http_client();
                             tokio::spawn(async move {
-                                match crate::agent::process_message((*config).clone(), &content).await {
+                                let mut config = (*config).clone();
+                                if let Some(provider) = &config.default_provider {
+                                    if provider.contains("ai.gitee.com") {
+                                        config.agent.tool_dispatcher = "xml".to_string();
+                                    }
+                                }
+                                match crate::agent::process_message(config, &content).await {
                                     Ok(response) => {
                                         tracing::info!("DingTalk: process_message returned: {}", response);
                                         let text = if let Ok(json) = serde_json::from_str::<serde_json::Value>(&response) {
