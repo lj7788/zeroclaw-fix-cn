@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio_tungstenite::tungstenite::Message;
-use uuid::Uuid;
 
 const DINGTALK_BOT_CALLBACK_TOPIC: &str = "/v1.0/im/bot/messages/get";
 
@@ -15,6 +14,7 @@ pub struct DingTalkChannel {
     client_id: String,
     client_secret: String,
     allowed_users: Vec<String>,
+    config: Option<Arc<crate::config::Config>>,
     /// Per-chat session webhooks for sending replies (chatID -> webhook URL).
     /// DingTalk provides a unique webhook URL with each incoming message.
     session_webhooks: Arc<RwLock<HashMap<String, String>>>,
@@ -33,8 +33,14 @@ impl DingTalkChannel {
             client_id,
             client_secret,
             allowed_users,
+            config: None,
             session_webhooks: Arc::new(RwLock::new(HashMap::new())),
         }
+    }
+
+    pub fn with_config(mut self, config: Arc<crate::config::Config>) -> Self {
+        self.config = Some(config);
+        self
     }
 
     fn http_client(&self) -> reqwest::Client {
@@ -148,7 +154,7 @@ impl Channel for DingTalkChannel {
         Ok(())
     }
 
-    async fn listen(&self, tx: tokio::sync::mpsc::Sender<ChannelMessage>) -> anyhow::Result<()> {
+    async fn listen(&self, _tx: tokio::sync::mpsc::Sender<ChannelMessage>) -> anyhow::Result<()> {
         tracing::info!("DingTalk: registering gateway connection...");
 
         let gw = self.register_connection().await?;
@@ -242,11 +248,68 @@ impl Channel for DingTalkChannel {
 
                     // Store session webhook for later replies
                     if let Some(webhook) = data.get("sessionWebhook").and_then(|w| w.as_str()) {
+                        tracing::info!("DingTalk: received webhook URL: {}", webhook);
                         let webhook = webhook.to_string();
                         let mut webhooks = self.session_webhooks.write().await;
-                        // Use both keys so reply routing works for both group and private flows.
                         webhooks.insert(chat_id.clone(), webhook.clone());
-                        webhooks.insert(sender_id.to_string(), webhook);
+                        webhooks.insert(sender_id.to_string(), webhook.clone());
+
+                        // Also process directly using process_message (same as /agent)
+                        // This uses run_tool_call_loop which is faster
+                        if let Some(ref config) = self.config {
+                            tracing::info!("DingTalk: processing message: {}", content);
+                            let config = config.clone();
+                            let content = content.to_string();
+                            let http_client = self.http_client();
+                            tokio::spawn(async move {
+                                match crate::agent::process_message((*config).clone(), &content).await {
+                                    Ok(response) => {
+                                        tracing::info!("DingTalk: process_message returned: {}", response);
+                                        let text = if let Ok(json) = serde_json::from_str::<serde_json::Value>(&response) {
+                                            json.get("content")
+                                                .and_then(|c| c.as_str())
+                                                .unwrap_or(&response)
+                                                .to_string()
+                                        } else {
+                                            response
+                                        };
+                                        tracing::info!("DingTalk: sending response: {}", text);
+                                        let title = "ZeroClaw";
+                                        let body = serde_json::json!({
+                                            "msgtype": "markdown",
+                                            "markdown": {
+                                                "title": title,
+                                                "text": text,
+                                            }
+                                        });
+                                        if let Err(e) = http_client
+                                            .post(&webhook)
+                                            .json(&body)
+                                            .send()
+                                            .await
+                                        {
+                                            tracing::error!("DingTalk direct reply failed: {e}");
+                                        }
+                                    }
+                                    Err(e) => {
+                                        tracing::error!("DingTalk process_message failed: {e:#}");
+                                        let error_msg = "Sorry, I couldn't process your message right now.";
+                                        let body = serde_json::json!({
+                                            "msgtype": "markdown",
+                                            "markdown": {
+                                                "title": "ZeroClaw",
+                                                "text": error_msg,
+                                            }
+                                        });
+                                        let _ = http_client
+                                            .post(&webhook)
+                                            .json(&body)
+                                            .send()
+                                            .await;
+                                    }
+                                }
+                            });
+                        }
                     }
 
                     // Acknowledge the event
@@ -267,23 +330,6 @@ impl Channel for DingTalkChannel {
                     });
                     let _ = write.send(Message::Text(ack.to_string().into())).await;
 
-                    let channel_msg = ChannelMessage {
-                        id: Uuid::new_v4().to_string(),
-                        sender: sender_id.to_string(),
-                        reply_target: chat_id,
-                        content: content.to_string(),
-                        channel: "dingtalk".to_string(),
-                        timestamp: std::time::SystemTime::now()
-                            .duration_since(std::time::UNIX_EPOCH)
-                            .unwrap_or_default()
-                            .as_secs(),
-                        thread_ts: None,
-                    };
-
-                    if tx.send(channel_msg).await.is_err() {
-                        tracing::warn!("DingTalk: message channel closed");
-                        break;
-                    }
                 }
                 _ => {}
             }

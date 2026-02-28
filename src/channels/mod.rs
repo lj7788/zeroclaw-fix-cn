@@ -1912,21 +1912,35 @@ async fn process_channel_message(
                         .await
                     {
                         tracing::warn!("Failed to finalize draft: {e}; sending as new message");
-                        let _ = channel
-                            .send(
-                                &SendMessage::new(&delivered_response, &msg.reply_target)
-                                    .in_thread(msg.thread_ts.clone()),
-                            )
-                            .await;
+                        let channel = Arc::clone(channel);
+                        let reply_target = msg.reply_target.clone();
+                        let thread_ts = msg.thread_ts.clone();
+                        let response = delivered_response.clone();
+                        tokio::spawn(async move {
+                            let _ = channel
+                                .send(
+                                    &SendMessage::new(response, &reply_target)
+                                        .in_thread(thread_ts),
+                                )
+                                .await;
+                        });
                     }
-                } else if let Err(e) = channel
-                    .send(
-                        &SendMessage::new(delivered_response, &msg.reply_target)
-                            .in_thread(msg.thread_ts.clone()),
-                    )
-                    .await
-                {
-                    eprintln!("  ❌ Failed to reply on {}: {e}", channel.name());
+                } else {
+                    let channel = Arc::clone(channel);
+                    let reply_target = msg.reply_target.clone();
+                    let thread_ts = msg.thread_ts.clone();
+                    let response = delivered_response.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = channel
+                            .send(
+                                &SendMessage::new(response, &reply_target)
+                                    .in_thread(thread_ts),
+                            )
+                            .await
+                        {
+                            eprintln!("  ❌ Failed to reply on {}: {e}", channel.name());
+                        }
+                    });
                 }
             }
         }
@@ -2038,12 +2052,18 @@ async fn process_channel_message(
                             .finalize_draft(&msg.reply_target, draft_id, &format!("⚠️ Error: {e}"))
                             .await;
                     } else {
-                        let _ = channel
-                            .send(
-                                &SendMessage::new(format!("⚠️ Error: {e}"), &msg.reply_target)
-                                    .in_thread(msg.thread_ts.clone()),
-                            )
-                            .await;
+                        let channel = Arc::clone(channel);
+                        let reply_target = msg.reply_target.clone();
+                        let thread_ts = msg.thread_ts.clone();
+                        let error_msg = format!("⚠️ Error: {e}");
+                        tokio::spawn(async move {
+                            let _ = channel
+                                .send(
+                                    &SendMessage::new(error_msg, &reply_target)
+                                        .in_thread(thread_ts),
+                                )
+                                .await;
+                        });
                     }
                 }
             }
@@ -2086,12 +2106,17 @@ async fn process_channel_message(
                         .finalize_draft(&msg.reply_target, draft_id, error_text)
                         .await;
                 } else {
-                    let _ = channel
-                        .send(
-                            &SendMessage::new(error_text, &msg.reply_target)
-                                .in_thread(msg.thread_ts.clone()),
-                        )
-                        .await;
+                    let channel = Arc::clone(channel);
+                    let reply_target = msg.reply_target.clone();
+                    let thread_ts = msg.thread_ts.clone();
+                    tokio::spawn(async move {
+                        let _ = channel
+                            .send(
+                                &SendMessage::new(error_text, &reply_target)
+                                    .in_thread(thread_ts),
+                            )
+                            .await;
+                    });
                 }
             }
         }
@@ -2937,11 +2962,14 @@ fn collect_configured_channels(
     if let Some(ref dt) = config.channels_config.dingtalk {
         channels.push(ConfiguredChannel {
             display_name: "DingTalk",
-            channel: Arc::new(DingTalkChannel::new(
-                dt.client_id.clone(),
-                dt.client_secret.clone(),
-                dt.allowed_users.clone(),
-            )),
+            channel: Arc::new(
+                DingTalkChannel::new(
+                    dt.client_id.clone(),
+                    dt.client_secret.clone(),
+                    dt.allowed_users.clone(),
+                )
+                .with_config(Arc::new(config.clone())),
+            ),
         });
     }
 
